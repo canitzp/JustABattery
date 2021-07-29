@@ -1,0 +1,9 @@
+{
+  "item.justabattery.battery": "Battery",
+  "item.justabattery.desc.level": "Level: %d",
+  "item.justabattery.desc.mode.0": "No Mode set. User Shift + Mouse-Right in world to change it.",
+  "item.justabattery.desc.mode.1": "Fist found. The first found item is charged.",
+  "item.justabattery.desc.mode.2": "All. The energy is given to all energy items at once.",
+  "item.justabattery.desc.mode.3": "Random. The energy is given to a random item.",
+  "item.justabattery.desc.energy": "Energy stored: %dFE/%dFE"
+}
