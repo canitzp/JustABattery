@@ -1,8 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
 .gradle/
 .idea/
-FeederHelmet.iml
+data/
 build/
 classes/
 run/
-runs_server/
+run_server/
