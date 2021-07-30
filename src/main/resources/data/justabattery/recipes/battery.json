@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "iri",
-    "lel",
-    "iri"
+    " g ",
+    "lrl",
+    "ccc"
   ],
   "key": {
     "r": {
@@ -12,11 +12,11 @@
     "l": {
       "tag": "forge:gems/lapis"
     },
-    "e": {
-      "tag": "forge:gems/emerald"
+    "g": {
+      "tag": "forge:nuggets/gold"
     },
-    "i": {
-      "tag": "forge:ingots/iron"
+    "c": {
+      "item": "minecraft:copper_ingot"
     }
   },
   "result": {

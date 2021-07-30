@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -19,19 +20,21 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class BatteryItem extends Item {
     
-    public static final int BATTERY_INITIAL_CAPACITY = 20_000;
+    public static final int BATTERY_INITIAL_CAPACITY = JustAConfig.get().battery_capacity;
+    public static final int BATTERY_STAGED_TRANSFER = JustAConfig.get().battery_transfer;
+    public static final int BATTERY_MAX_LEVEL = JustAConfig.get().battery_max_level;
+    public static final int BATTERY_MAX_TRACE_WIDTH = JustAConfig.get().battery_max_trace_width;
     
     public static final byte MODE_NONE = 0;
     public static final byte MODE_FIRST_FOUND = 1;
@@ -48,6 +51,10 @@ public class BatteryItem extends Item {
     
     public static int getCapacity(ItemStack stack){
         return BATTERY_INITIAL_CAPACITY * getLevel(stack);
+    }
+    
+    public static int getMaxTransfer(ItemStack stack){
+        return BATTERY_STAGED_TRANSFER * getTraceWidth(stack);
     }
     
     public static byte getMode(ItemStack stack){
@@ -67,8 +74,17 @@ public class BatteryItem extends Item {
         stack.getOrCreateTag().putByte("Level", level);
     }
     
+    public static byte getTraceWidth(ItemStack stack){
+        byte traceWidth = stack.getOrCreateTag().getByte("TraceWidth");
+        return traceWidth <= 0 ? 1 : traceWidth;
+    }
+    
+    public static void setTraceWidth(ItemStack stack, byte traceWidth){
+        stack.getOrCreateTag().putByte("TraceWidth", traceWidth);
+    }
+    
     public BatteryItem(){
-        super(new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
+        super(new Properties().stacksTo(1).tab(JustABattery.TAB));
     }
     
     @Override
@@ -76,10 +92,39 @@ public class BatteryItem extends Item {
         super.appendHoverText(stack, level, tooltip, flag);
     
         tooltip.add(new TranslatableComponent("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
-        
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.mode." + getMode(stack)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.add(new TranslatableComponent("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
+    
+        byte mode = getMode(stack);
+        tooltip.add(new TranslatableComponent("item.justabattery.prefix.mode").append(" ").append(new TranslatableComponent("item.justabattery.name.mode." + mode)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.add(new TranslatableComponent("item.justabattery.desc.mode." + mode).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
         
         tooltip.add(new TranslatableComponent("item.justabattery.desc.energy", getStoredEnergy(stack),getCapacity(stack)).withStyle(ChatFormatting.RED));
+    }
+    
+    @Override
+    public Component getName(ItemStack stack){
+        MutableComponent primary = null;
+        MutableComponent secondary = new TranslatableComponent(this.getDescriptionId(stack));
+        
+        byte level = getLevel(stack);
+        if(level >= 2 && level <= 5){
+            primary = new TranslatableComponent("item.justabattery.name.prefix." + level);
+        } else if (level > 5){
+            primary = new TranslatableComponent("item.justabattery.name.prefix", level);
+        }
+        
+        return primary != null ? primary.append(" ").append(secondary) : secondary;
+    }
+    
+    @Override
+    public Component getHighlightTip(ItemStack stack, Component displayName){
+        byte mode = getMode(stack);
+        if(mode >= MODE_FIRST_FOUND && mode <= MODE_RANDOM){
+            if(displayName instanceof MutableComponent mutableComponent){
+                mutableComponent.append(" - ").append(new TranslatableComponent("item.justabattery.prefix.mode")).append(" ").append(new TranslatableComponent("item.justabattery.name.mode." + mode));
+            }
+        }
+        return super.getHighlightTip(stack, displayName);
     }
     
     @Override
@@ -97,6 +142,7 @@ public class BatteryItem extends Item {
                     mode = MODE_NONE;
                 }
                 setMode(stack, mode);
+                
             }
             return InteractionResult.SUCCESS;
         }
@@ -106,15 +152,27 @@ public class BatteryItem extends Item {
     @Override
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> stacks){
         if(this.allowdedIn(tab)){
-            for(byte i = 1; i < 3; i++){
+            for(byte i = 1; i <= 5; i++){
                 ItemStack empty = this.getDefaultInstance();
                 setLevel(empty, i);
                 
                 ItemStack full = empty.copy();
                 setStoredEnergy(full, getCapacity(full));
                 
+                ItemStack emptyThickTraces = empty.copy();
+                setTraceWidth(emptyThickTraces, Byte.MAX_VALUE);
+                
+                ItemStack fullThickTraces = full.copy();
+                setTraceWidth(fullThickTraces, Byte.MAX_VALUE);
+                
                 stacks.add(empty);
                 stacks.add(full);
+                stacks.add(emptyThickTraces);
+                stacks.add(fullThickTraces);
+                // fill remaining row with empty stacks
+                for(int j = 5; j <= 9; j++){
+                    stacks.add(ItemStack.EMPTY);
+                }
             }
         }
     }
@@ -122,7 +180,7 @@ public class BatteryItem extends Item {
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt){
-        return new StackEnergyStorage(getCapacity(stack), stack);
+        return new StackEnergyStorage(stack);
     }
     
     @Override
@@ -136,62 +194,71 @@ public class BatteryItem extends Item {
                 return;
             }
             
-            int storedEnergy = getStoredEnergy(stack);
             List<ItemStack> energyItems = player.getInventory().items
                 .stream()
                 .filter(itemStack -> !ItemStack.isSameItemSameTags(itemStack, stack))
                 .filter(itemStack -> itemStack.getCapability(CapabilityEnergy.ENERGY).isPresent())
                 .collect(Collectors.toList());
             if(energyItems.size() > 0){
+                int storedEnergy = getStoredEnergy(stack);
+                int maxTransferableEnergy = Math.min(storedEnergy, getMaxTransfer(stack));
+                int actualTransferredEnergy = 0;
                 switch(mode){
-                    case MODE_FIRST_FOUND -> this.transferEnergyToFirstItem(storedEnergy, energyItems);
-                    case MODE_ALL -> this.transferEnergyToAll(storedEnergy, energyItems);
-                    case MODE_RANDOM -> this.transferEnergyRandom(storedEnergy, energyItems);
+                    case MODE_FIRST_FOUND -> actualTransferredEnergy = this.transferEnergyToFirstItem(maxTransferableEnergy, energyItems);
+                    case MODE_ALL -> actualTransferredEnergy = this.transferEnergyToAll(maxTransferableEnergy, energyItems);
+                    case MODE_RANDOM -> actualTransferredEnergy = this.transferEnergyRandom(maxTransferableEnergy, energyItems);
+                }
+                if(actualTransferredEnergy > 0){
+                    BatteryItem.setStoredEnergy(stack, storedEnergy - actualTransferredEnergy);
                 }
             }
         }
     }
     
-    private void transferEnergyToFirstItem(int energy, List<ItemStack> storages){
-        AtomicBoolean energyTransferred = new AtomicBoolean(false);
+    // return transferred energy
+    private int transferEnergyToFirstItem(int energy, List<ItemStack> storages){
+        AtomicInteger energyTransferred = new AtomicInteger(0);
         int index = 0;
-        while(!energyTransferred.get() && index < storages.size()){
+        while(energyTransferred.get() == 0 && index < storages.size()){
             ItemStack energyReceiverStack = storages.get(index++);
             energyReceiverStack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyReceiverStorage -> {
-                int transferredEnergy = energyReceiverStorage.receiveEnergy(energy, false);
-                if(transferredEnergy >= 0){
-                    energyTransferred.set(true);
-                }
+                energyTransferred.set(energyReceiverStorage.receiveEnergy(energy, false));
             });
         }
+        return energyTransferred.get();
     }
     
-    private void transferEnergyToAll(int energy, List<ItemStack> storages){
+    // return transferred energy
+    private int transferEnergyToAll(int energy, List<ItemStack> storages){
+        AtomicInteger energyTransferred = new AtomicInteger(0);
         List<ItemStack> stacksThatReallyWantSomeEnergy = storages.stream().filter(stack -> stack.getCapability(CapabilityEnergy.ENERGY).resolve().get().receiveEnergy(1, true) > 0).collect(Collectors.toList());
         if(stacksThatReallyWantSomeEnergy.size() > 0){
             int energyPerStack = (int) (energy / (stacksThatReallyWantSomeEnergy.size() * 1.0F));
             stacksThatReallyWantSomeEnergy.forEach(itemStack -> {
                 itemStack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyReceiverStorage -> {
-                    energyReceiverStorage.receiveEnergy(energyPerStack, false);
+                    energyTransferred.addAndGet(energyReceiverStorage.receiveEnergy(energyPerStack, false));
                 });
             });
         }
+        return energyTransferred.get();
     }
     
-    private void transferEnergyRandom(int energy, List<ItemStack> storages){
+    // return transferred energy
+    private int transferEnergyRandom(int energy, List<ItemStack> storages){
+        AtomicInteger energyTransferred = new AtomicInteger(0);
         int index = new Random().nextInt(storages.size());
         storages.get(index).getCapability(CapabilityEnergy.ENERGY).ifPresent(energyReceiverStorage -> {
-            energyReceiverStorage.receiveEnergy(energy, false);
+            energyTransferred.set(energyReceiverStorage.receiveEnergy(energy, false));
         });
+        return energyTransferred.get();
     }
     
-    public static class StackEnergyStorage extends EnergyStorage implements ICapabilityProvider {
+    public static class StackEnergyStorage implements IEnergyStorage, ICapabilityProvider {
     
         private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> this);
         private final ItemStack stack;
         
-        public StackEnergyStorage(int capacity, ItemStack stack){
-            super(capacity);
+        public StackEnergyStorage(ItemStack stack){
             this.stack = stack;
         }
         
@@ -205,13 +272,28 @@ public class BatteryItem extends Item {
         }
     
         @Override
+        public int getMaxEnergyStored(){
+            return BatteryItem.getCapacity(this.stack);
+        }
+    
+        @Override
+        public boolean canExtract(){
+            return this.getEnergyStored() > 0;
+        }
+    
+        @Override
+        public boolean canReceive(){
+            return this.getEnergyStored() < this.getMaxEnergyStored();
+        }
+    
+        @Override
         public int receiveEnergy(int maxReceive, boolean simulate){
             if (!canReceive()){
                 return 0;
             }
         
             int stored = this.getEnergyStored();
-            int energyReceived = Math.min(this.capacity - stored, Math.min(this.maxReceive, maxReceive));
+            int energyReceived = Math.min(this.getMaxEnergyStored() - stored, Math.min(BatteryItem.getMaxTransfer(this.stack), maxReceive));
             if (!simulate){
                 this.setEnergyStored(stored + energyReceived);
             }
@@ -225,7 +307,7 @@ public class BatteryItem extends Item {
             }
         
             int stored = this.getEnergyStored();
-            int energyExtracted = Math.min(stored, Math.min(this.maxExtract, maxExtract));
+            int energyExtracted = Math.min(stored, Math.min(BatteryItem.getMaxTransfer(this.stack), maxExtract));
             if (!simulate){
                 this.setEnergyStored(stored - energyExtracted);
             }

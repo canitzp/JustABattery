@@ -1,33 +1,53 @@
 package de.canitzp.justabattery;
 
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.Collection;
+
+@Mod.EventBusSubscriber
 @Mod(JustABattery.MODID)
 public class JustABattery {
     
     public static final String MODID = "justabattery";
     
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
+    
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final RegistryObject<BatteryItem> BATTERY_ITEM = ITEMS.register("battery", BatteryItem::new);
     
-    public JustABattery(){
-        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public static final CreativeModeTab TAB = new CreativeModeTab(MODID) {
+        @Override
+        public ItemStack makeIcon(){
+            return BATTERY_ITEM.get().getDefaultInstance();
+        }
+    };
     
+    public JustABattery(){
+        LOGGER.info("[JustABattery]: Starting. Thanks for using :+1:. Also many thanks to markygnlg, who suggested this mod idea in the first place!");
+        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        
+        JustAConfig.load();
+        
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadClient);
         });
@@ -41,6 +61,23 @@ public class JustABattery {
             byte batLevel = BatteryItem.getLevel(stack);
             return batLevel <= 0 ? 1 : batLevel > 5 ? 5 : batLevel;
         });
+        LOGGER.info("[JustABattery]: Client setup done.");
+    }
+    
+    @SubscribeEvent
+    public static void onWorldLoad(WorldEvent.Load event){
+        LevelAccessor levelAccessor = event.getWorld();
+        if(levelAccessor instanceof Level level){
+            if(level.dimension() != Level.OVERWORLD){
+                return;
+            }
+    
+            RecipeManager recipeManager = level.getRecipeManager();
+            Collection<Recipe<?>> allRecipes = recipeManager.getRecipes();
+            allRecipes.add(BatteryCombiningRecipe.INSTANCE);
+            recipeManager.replaceRecipes(allRecipes);
+            LOGGER.info("[JustABattery]: Battery recipe injected.");
+        }
     }
     
 }
