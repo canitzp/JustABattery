@@ -40,5 +40,5 @@ Again you decide how much and where to put the batteries and nuggets.
 
 ### Mix-it-like-you-want
 Well like already said, there are no rules on how to upgrade them.  
-You can mix the ingredients as you like, as long as it stays within the predefined bounds (Default: Level & Trace-width of 100).
+You can mix the ingredients as you like, as long as it stays within the predefined bounds (Default: Level & Trace-width of 100).  
 ![mixitlikeyouwant](readme/mixitlikeyouwant.png)
