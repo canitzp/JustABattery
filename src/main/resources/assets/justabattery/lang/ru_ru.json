@@ -1,0 +1,26 @@
+///Russian lang added by DrHesperus
+///P.S: Write the text is more correctly. E.g - item.justabattery.name.mode.0 and more...
+{
+  "itemGroup.justabattery": "Just a Battery",
+
+  "item.justabattery.battery": "Батарейка",
+  "item.justabattery.name.prefix": "%d-ячейка",
+  "item.justabattery.name.prefix.2": "Двойная",
+  "item.justabattery.name.prefix.3": "Тройная",
+  "item.justabattery.name.prefix.4": "Четверократная",
+  "item.justabattery.name.prefix.5": "Пятикратная",
+
+  "item.justabattery.desc.level": "Уровень: %d",
+  "item.justabattery.desc.tracewidth": "Ширина следа: %d (Максимальная передача: %dFE/в тиках)",
+
+  "item.justabattery.prefix.mode": "Режим:",
+  "item.justabattery.name.mode.0": "Никакой",
+  "item.justabattery.desc.mode.0": "Пользователь Shift + Пкм в мире, чтобы сменить её.",
+  "item.justabattery.name.mode.1": "Сначала, первый найденный получает",
+  "item.justabattery.desc.mode.1": "Первый найденный предмет изменён.",
+  "item.justabattery.name.mode.2": "Одновременно",
+  "item.justabattery.desc.mode.2": "Энергия даёт всем энергию предметам одновременно.",
+  "item.justabattery.name.mode.3": "Случайно",
+  "item.justabattery.desc.mode.3": "Энергия даётся к случайному предмету.",
+  "item.justabattery.desc.energy": "Энергии хранится: %dFE/%dFE"
+}
