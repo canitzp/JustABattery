@@ -1,21 +1,22 @@
 package de.canitzp.justabattery;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -65,22 +66,22 @@ public class BatteryItem extends Item {
         stack.getOrCreateTag().putByte("Mode", mode);
     }
     
-    public static byte getLevel(ItemStack stack){
-        byte level = stack.getOrCreateTag().getByte("Level");
+    public static int getLevel(ItemStack stack){
+        int level = stack.getOrCreateTag().getInt("Level");
         return level <= 0 ? 1 : level;
     }
     
-    public static void setLevel(ItemStack stack, byte level){
-        stack.getOrCreateTag().putByte("Level", level);
+    public static void setLevel(ItemStack stack, int level){
+        stack.getOrCreateTag().putInt("Level", level);
     }
     
-    public static byte getTraceWidth(ItemStack stack){
-        byte traceWidth = stack.getOrCreateTag().getByte("TraceWidth");
+    public static int getTraceWidth(ItemStack stack){
+        int traceWidth = stack.getOrCreateTag().getInt("TraceWidth");
         return traceWidth <= 0 ? 1 : traceWidth;
     }
     
-    public static void setTraceWidth(ItemStack stack, byte traceWidth){
-        stack.getOrCreateTag().putByte("TraceWidth", traceWidth);
+    public static void setTraceWidth(ItemStack stack, int traceWidth){
+        stack.getOrCreateTag().putInt("TraceWidth", traceWidth);
     }
     
     public BatteryItem(){
@@ -88,40 +89,41 @@ public class BatteryItem extends Item {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag){
+    public void appendHoverText(ItemStack stack, @Nullable World level, List<ITextComponent> tooltip, ITooltipFlag flag){
         super.appendHoverText(stack, level, tooltip, flag);
     
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
+        tooltip.add(new TranslationTextComponent("item.justabattery.desc.level", getLevel(stack)).withStyle(TextFormatting.DARK_PURPLE));
+        tooltip.add(new TranslationTextComponent("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(TextFormatting.DARK_PURPLE));
     
         byte mode = getMode(stack);
-        tooltip.add(new TranslatableComponent("item.justabattery.prefix.mode").append(" ").append(new TranslatableComponent("item.justabattery.name.mode." + mode)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.mode." + mode).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.add(new TranslationTextComponent("item.justabattery.prefix.mode").append(" ").append(new TranslationTextComponent("item.justabattery.name.mode." + mode)).withStyle(TextFormatting.DARK_PURPLE, TextFormatting.ITALIC));
+        tooltip.add(new TranslationTextComponent("item.justabattery.desc.mode." + mode).withStyle(TextFormatting.DARK_PURPLE, TextFormatting.ITALIC));
         
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.energy", getStoredEnergy(stack),getCapacity(stack)).withStyle(ChatFormatting.RED));
+        tooltip.add(new TranslationTextComponent("item.justabattery.desc.energy", getStoredEnergy(stack),getCapacity(stack)).withStyle(TextFormatting.RED));
     }
     
     @Override
-    public Component getName(ItemStack stack){
-        MutableComponent primary = null;
-        MutableComponent secondary = new TranslatableComponent(this.getDescriptionId(stack));
+    public ITextComponent getName(ItemStack stack){
+        TextComponent primary = null;
+        TextComponent secondary = new TranslationTextComponent(this.getDescriptionId(stack));
         
-        byte level = getLevel(stack);
+        int level = getLevel(stack);
         if(level >= 2 && level <= 5){
-            primary = new TranslatableComponent("item.justabattery.name.prefix." + level);
+            primary = new TranslationTextComponent("item.justabattery.name.prefix." + level);
         } else if (level > 5){
-            primary = new TranslatableComponent("item.justabattery.name.prefix", level);
+            primary = new TranslationTextComponent("item.justabattery.name.prefix", level);
         }
         
         return primary != null ? primary.append(" ").append(secondary) : secondary;
     }
     
     @Override
-    public Component getHighlightTip(ItemStack stack, Component displayName){
+    public ITextComponent getHighlightTip(ItemStack stack, ITextComponent displayName){
         byte mode = getMode(stack);
         if(mode >= MODE_FIRST_FOUND && mode <= MODE_RANDOM){
-            if(displayName instanceof MutableComponent mutableComponent){
-                mutableComponent.append(" - ").append(new TranslatableComponent("item.justabattery.prefix.mode")).append(" ").append(new TranslatableComponent("item.justabattery.name.mode." + mode));
+            if(displayName instanceof TextComponent){
+                TextComponent mutableComponent = (TextComponent) displayName;
+                mutableComponent.append(" - ").append(new TranslationTextComponent("item.justabattery.prefix.mode")).append(" ").append(new TranslationTextComponent("item.justabattery.name.mode." + mode));
             }
         }
         return super.getHighlightTip(stack, displayName);
@@ -133,7 +135,7 @@ public class BatteryItem extends Item {
     }
     
     @Override
-    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context){
+    public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context){
         if(context.getPlayer() != null && context.getPlayer().isCrouching()){
             if(!context.getLevel().isClientSide()){
                 byte mode = getMode(stack);
@@ -142,29 +144,29 @@ public class BatteryItem extends Item {
                     mode = MODE_NONE;
                 }
                 setMode(stack, mode);
-                
+            
             }
-            return InteractionResult.SUCCESS;
+            return ActionResultType.SUCCESS;
         }
         return super.onItemUseFirst(stack, context);
     }
     
     @Override
-    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> stacks){
+    public void fillItemCategory(ItemGroup tab, NonNullList<ItemStack> stacks){
         if(this.allowdedIn(tab)){
             for(byte i = 1; i <= 5; i++){
                 ItemStack empty = this.getDefaultInstance();
                 setLevel(empty, i);
-                
+            
                 ItemStack full = empty.copy();
                 setStoredEnergy(full, getCapacity(full));
-                
+            
                 ItemStack emptyThickTraces = empty.copy();
-                setTraceWidth(emptyThickTraces, Byte.MAX_VALUE);
-                
+                setTraceWidth(emptyThickTraces, BATTERY_MAX_TRACE_WIDTH);
+            
                 ItemStack fullThickTraces = full.copy();
-                setTraceWidth(fullThickTraces, Byte.MAX_VALUE);
-                
+                setTraceWidth(fullThickTraces, BATTERY_MAX_TRACE_WIDTH);
+            
                 stacks.add(empty);
                 stacks.add(full);
                 stacks.add(emptyThickTraces);
@@ -179,24 +181,25 @@ public class BatteryItem extends Item {
     
     @Nullable
     @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt){
+    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt){
         return new StackEnergyStorage(stack);
     }
     
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int p_41407_, boolean p_41408_){
+    public void inventoryTick(ItemStack stack, World level, Entity entity, int p_41407_, boolean p_41408_){
         if(level.isClientSide()){
             return;
         }
-        if(entity instanceof Player player){
+        if(entity instanceof PlayerEntity){
+            PlayerEntity player = (PlayerEntity) entity;
             int mode = getMode(stack);
             if(mode == 0){
                 return;
             }
             
-            List<ItemStack> energyItems = player.getInventory().items
+            List<ItemStack> energyItems = player.inventory.items
                 .stream()
-                .filter(itemStack -> !ItemStack.isSameItemSameTags(itemStack, stack))
+                .filter(itemStack -> !ItemStack.matches(itemStack, stack))
                 .filter(itemStack -> itemStack.getCapability(CapabilityEnergy.ENERGY).isPresent())
                 .collect(Collectors.toList());
             if(energyItems.size() > 0){
@@ -204,9 +207,18 @@ public class BatteryItem extends Item {
                 int maxTransferableEnergy = Math.min(storedEnergy, getMaxTransfer(stack));
                 int actualTransferredEnergy = 0;
                 switch(mode){
-                    case MODE_FIRST_FOUND -> actualTransferredEnergy = this.transferEnergyToFirstItem(maxTransferableEnergy, energyItems);
-                    case MODE_ALL -> actualTransferredEnergy = this.transferEnergyToAll(maxTransferableEnergy, energyItems);
-                    case MODE_RANDOM -> actualTransferredEnergy = this.transferEnergyRandom(maxTransferableEnergy, energyItems);
+                    case MODE_FIRST_FOUND: {
+                        actualTransferredEnergy = this.transferEnergyToFirstItem(maxTransferableEnergy, energyItems);
+                        break;
+                    }
+                    case MODE_ALL: {
+                        actualTransferredEnergy = this.transferEnergyToAll(maxTransferableEnergy, energyItems);
+                        break;
+                    }
+                    case MODE_RANDOM: {
+                        actualTransferredEnergy = this.transferEnergyRandom(maxTransferableEnergy, energyItems);
+                        break;
+                    }
                 }
                 if(actualTransferredEnergy > 0){
                     BatteryItem.setStoredEnergy(stack, storedEnergy - actualTransferredEnergy);

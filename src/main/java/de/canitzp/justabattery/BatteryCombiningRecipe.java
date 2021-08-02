@@ -1,12 +1,12 @@
 package de.canitzp.justabattery;
 
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraft.world.level.Level;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
 
 public class BatteryCombiningRecipe extends ShapelessRecipe {
@@ -25,7 +25,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
         return true;
     }
     
-    private ItemStack getFirstBattery(CraftingContainer inv){
+    private ItemStack getFirstBattery(CraftingInventory inv){
         for(int i = 0; i < inv.getContainerSize(); i++){
             ItemStack stack = inv.getItem(i);
             if(stack.getItem() instanceof BatteryItem){
@@ -35,7 +35,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
         return ItemStack.EMPTY;
     }
     
-    private boolean checkIfOnlyValidItemsArePresent(CraftingContainer inv){
+    private boolean checkIfOnlyValidItemsArePresent(CraftingInventory inv){
         for(int i = 0; i < inv.getContainerSize(); i++){
             ItemStack stack = inv.getItem(i);
             if(!stack.isEmpty() && this.getIngredients().stream().noneMatch(ingredient -> ingredient.test(stack))){
@@ -46,7 +46,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     }
     
     // needs to be an int, so we don't rely on checking an overflow
-    private int getCombinedLevel(CraftingContainer inv){
+    private int getCombinedLevel(CraftingInventory inv){
         int combinedLevel = 0;
         for(int i = 0; i < inv.getContainerSize(); i++){
             ItemStack stack = inv.getItem(i);
@@ -57,12 +57,12 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
         return combinedLevel;
     }
     
-    private byte getMaxTraceWidth(CraftingContainer inv){
-        byte combinedTraceWidth = 0;
+    private int getMaxTraceWidth(CraftingInventory inv){
+        int combinedTraceWidth = 0;
         for(int i = 0; i < inv.getContainerSize(); i++){
             ItemStack stack = inv.getItem(i);
             if(!stack.isEmpty() && stack.getItem() instanceof BatteryItem){
-                byte traceWidth = BatteryItem.getTraceWidth(stack);
+                int traceWidth = BatteryItem.getTraceWidth(stack);
                 if(traceWidth > combinedTraceWidth){
                     combinedTraceWidth = traceWidth;
                 }
@@ -71,7 +71,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
         return combinedTraceWidth;
     }
     
-    private int getCombinedEnergy(CraftingContainer inv){
+    private int getCombinedEnergy(CraftingInventory inv){
         int combinedEnergy = 0;
         for(int i = 0; i < inv.getContainerSize(); i++){
             ItemStack stack = inv.getItem(i);
@@ -82,11 +82,11 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
         return combinedEnergy;
     }
     
-    private int getGoldNuggetAmount(CraftingContainer inv){
+    private int getGoldNuggetAmount(CraftingInventory inv){
         int nuggets = 0;
         for(int i = 0; i < inv.getContainerSize(); i++){
             ItemStack stack = inv.getItem(i);
-            if(stack.is(Tags.Items.NUGGETS_GOLD)){
+            if(stack.getItem().is(Tags.Items.NUGGETS_GOLD)){
                 nuggets++;
             }
         }
@@ -94,7 +94,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     }
     
     @Override
-    public ItemStack assemble(CraftingContainer inv){
+    public ItemStack assemble(CraftingInventory inv){
         ItemStack output = super.getResultItem().copy();
         // levels are combined; cast to byte is safe, as long as the matches() method is called
         BatteryItem.setLevel(output, (byte) this.getCombinedLevel(inv));
@@ -107,7 +107,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     }
     
     @Override
-    public boolean matches(CraftingContainer inv, Level level1){
+    public boolean matches(CraftingInventory inv, World level1){
         if(!this.checkIfOnlyValidItemsArePresent(inv)){
             return false;
         }
