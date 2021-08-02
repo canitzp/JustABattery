@@ -65,22 +65,22 @@ public class BatteryItem extends Item {
         stack.getOrCreateTag().putByte("Mode", mode);
     }
     
-    public static byte getLevel(ItemStack stack){
-        byte level = stack.getOrCreateTag().getByte("Level");
+    public static int getLevel(ItemStack stack){
+        int level = stack.getOrCreateTag().getInt("Level");
         return level <= 0 ? 1 : level;
     }
     
-    public static void setLevel(ItemStack stack, byte level){
-        stack.getOrCreateTag().putByte("Level", level);
+    public static void setLevel(ItemStack stack, int level){
+        stack.getOrCreateTag().putInt("Level", level);
     }
     
-    public static byte getTraceWidth(ItemStack stack){
-        byte traceWidth = stack.getOrCreateTag().getByte("TraceWidth");
+    public static int getTraceWidth(ItemStack stack){
+        int traceWidth = stack.getOrCreateTag().getInt("TraceWidth");
         return traceWidth <= 0 ? 1 : traceWidth;
     }
     
-    public static void setTraceWidth(ItemStack stack, byte traceWidth){
-        stack.getOrCreateTag().putByte("TraceWidth", traceWidth);
+    public static void setTraceWidth(ItemStack stack, int traceWidth){
+        stack.getOrCreateTag().putInt("TraceWidth", traceWidth);
     }
     
     public BatteryItem(){
@@ -105,8 +105,8 @@ public class BatteryItem extends Item {
     public Component getName(ItemStack stack){
         MutableComponent primary = null;
         MutableComponent secondary = new TranslatableComponent(this.getDescriptionId(stack));
-        
-        byte level = getLevel(stack);
+    
+        int level = getLevel(stack);
         if(level >= 2 && level <= 5){
             primary = new TranslatableComponent("item.justabattery.name.prefix." + level);
         } else if (level > 5){
@@ -160,10 +160,10 @@ public class BatteryItem extends Item {
                 setStoredEnergy(full, getCapacity(full));
                 
                 ItemStack emptyThickTraces = empty.copy();
-                setTraceWidth(emptyThickTraces, Byte.MAX_VALUE);
+                setTraceWidth(emptyThickTraces, BATTERY_MAX_TRACE_WIDTH);
                 
                 ItemStack fullThickTraces = full.copy();
-                setTraceWidth(fullThickTraces, Byte.MAX_VALUE);
+                setTraceWidth(fullThickTraces, BATTERY_MAX_TRACE_WIDTH);
                 
                 stacks.add(empty);
                 stacks.add(full);

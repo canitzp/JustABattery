@@ -57,12 +57,12 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
         return combinedLevel;
     }
     
-    private byte getMaxTraceWidth(CraftingContainer inv){
-        byte combinedTraceWidth = 0;
+    private int getMaxTraceWidth(CraftingContainer inv){
+        int combinedTraceWidth = 0;
         for(int i = 0; i < inv.getContainerSize(); i++){
             ItemStack stack = inv.getItem(i);
             if(!stack.isEmpty() && stack.getItem() instanceof BatteryItem){
-                byte traceWidth = BatteryItem.getTraceWidth(stack);
+                int traceWidth = BatteryItem.getTraceWidth(stack);
                 if(traceWidth > combinedTraceWidth){
                     combinedTraceWidth = traceWidth;
                 }

@@ -4,7 +4,7 @@ modLoader="javafml" #mandatory
 loaderVersion="[37,)" #mandatory
 # The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
-license="All rights reserved"
+license="LGPL v3"
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/canitzp/JustABattery/issues" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
@@ -27,7 +27,11 @@ displayName="JustABattery" #mandatory
 authors="canitzp" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
+Just as battery does exactly what it sounds like, it just adds a battery.
+There are two unique features: 1. The feature rich extraction modes and 2. the dynamic crafting.
+Try both and you'll enjoy this mod :).
 
+More information here: https://github.com/canitzp/JustABattery
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.justabattery]] #optional

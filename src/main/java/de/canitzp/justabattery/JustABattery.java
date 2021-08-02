@@ -58,8 +58,8 @@ public class JustABattery {
             return BatteryItem.getStoredEnergy(stack) / (BatteryItem.getCapacity(stack) * 1.0F);
         });
         ItemProperties.register(BATTERY_ITEM.get(), new ResourceLocation(MODID, "size"), (stack, level, entity, i) -> {
-            byte batLevel = BatteryItem.getLevel(stack);
-            return batLevel <= 0 ? 1 : batLevel > 5 ? 5 : batLevel;
+            int batLevel = BatteryItem.getLevel(stack);
+            return batLevel <= 0 ? 1 : Math.min(batLevel, 5);
         });
         LOGGER.info("[JustABattery]: Client setup done.");
     }
