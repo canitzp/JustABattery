@@ -74,10 +74,14 @@ public class JustABattery {
     
             RecipeManager recipeManager = level.getRecipeManager();
             Collection<Recipe<?>> allRecipes = recipeManager.getRecipes();
-            allRecipes.add(BatteryCombiningRecipe.INSTANCE);
-            recipeManager.replaceRecipes(allRecipes);
-            LOGGER.info("[JustABattery]: Battery recipe injected.");
+            if(allRecipes.stream().noneMatch(recipe -> recipe.getId().equals(BatteryCombiningRecipe.ID))){
+                // only add the recipe, if there isn't anyone
+                allRecipes.add(BatteryCombiningRecipe.INSTANCE);
+                recipeManager.replaceRecipes(allRecipes);
+                LOGGER.info("[JustABattery]: Battery recipe injected.");
+            } else {
+                LOGGER.info("[JustABattery]: Battery recipe aborted! The recipe id does already exist.");
+            }
         }
     }
-    
 }

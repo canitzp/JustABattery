@@ -1,3 +1,7 @@
+**39.0.0:**
+- Update to 1.18.1
+- Recipe injection check, if the recipe already exists.
+
 **38.0.0:**
 - Update to 1.18
 - New versioning numbering, still compatible with semver, but now the major number is equal to the major of the used minecraft forge version
