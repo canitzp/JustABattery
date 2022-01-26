@@ -10,7 +10,7 @@
   "item.justabattery.desc.tracewidth": "Trace width: %d (Max transfer: %dFE/t)",
   "item.justabattery.prefix.mode": "Mode:",
   "item.justabattery.name.mode.0": "None",
-  "item.justabattery.desc.mode.0": "User Shift + Mouse-Right in world to change it.",
+  "item.justabattery.desc.mode.0": "Sneak + Mouse-Right in world to change it.",
   "item.justabattery.name.mode.1": "First found first gets",
   "item.justabattery.desc.mode.1": "The first found item is charged.",
   "item.justabattery.name.mode.2": "All at once",
