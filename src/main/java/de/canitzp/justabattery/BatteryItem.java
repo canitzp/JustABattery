@@ -1,6 +1,7 @@
 package de.canitzp.justabattery;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -40,6 +42,7 @@ public class BatteryItem extends Item {
     public static final byte MODE_FIRST_FOUND = 1;
     public static final byte MODE_ALL = 2;
     public static final byte MODE_RANDOM = 3;
+    public static final byte MODE_CHARGE_SURROUNDING_BLOCKS = 4;
     
     public static int getStoredEnergy(ItemStack stack){
         return stack.getOrCreateTag().getInt("Energy");
@@ -119,7 +122,7 @@ public class BatteryItem extends Item {
     @Override
     public Component getHighlightTip(ItemStack stack, Component displayName){
         byte mode = getMode(stack);
-        if(mode >= MODE_FIRST_FOUND && mode <= MODE_RANDOM){
+        if(mode >= MODE_FIRST_FOUND && mode <= MODE_CHARGE_SURROUNDING_BLOCKS){
             if(displayName instanceof MutableComponent mutableComponent){
                 mutableComponent.append(" - ").append(new TranslatableComponent("item.justabattery.prefix.mode")).append(" ").append(new TranslatableComponent("item.justabattery.name.mode." + mode));
             }
@@ -138,7 +141,7 @@ public class BatteryItem extends Item {
             if(!context.getLevel().isClientSide()){
                 byte mode = getMode(stack);
                 mode++;
-                if(mode > MODE_RANDOM){
+                if(mode > MODE_CHARGE_SURROUNDING_BLOCKS){
                     mode = MODE_NONE;
                 }
                 setMode(stack, mode);
@@ -207,6 +210,7 @@ public class BatteryItem extends Item {
                     case MODE_FIRST_FOUND -> actualTransferredEnergy = this.transferEnergyToFirstItem(maxTransferableEnergy, energyItems);
                     case MODE_ALL -> actualTransferredEnergy = this.transferEnergyToAll(maxTransferableEnergy, energyItems);
                     case MODE_RANDOM -> actualTransferredEnergy = this.transferEnergyRandom(maxTransferableEnergy, energyItems);
+                    case MODE_CHARGE_SURROUNDING_BLOCKS -> actualTransferredEnergy = this.transferEnergyToBlocks(maxTransferableEnergy, player);
                 }
                 if(actualTransferredEnergy > 0){
                     BatteryItem.setStoredEnergy(stack, storedEnergy - actualTransferredEnergy);
@@ -251,6 +255,34 @@ public class BatteryItem extends Item {
             energyTransferred.set(energyReceiverStorage.receiveEnergy(energy, false));
         });
         return energyTransferred.get();
+    }
+
+    private int transferEnergyToBlocks(int energy, Player player){
+        AtomicInteger energyAvailable = new AtomicInteger(energy);
+        BlockPos.MutableBlockPos position = new BlockPos.MutableBlockPos();
+        for(int xOffset = -2; xOffset <= 2; xOffset++){
+            for(int yOffset = -2; yOffset <= 2; yOffset++){
+                for(int zOffset = -2; zOffset <= 2; zOffset++){
+                    if(xOffset == 0 && yOffset == 0 && zOffset == 0){
+                        continue;
+                    }
+                    position.setX(player.blockPosition().getX() + xOffset);
+                    position.setY(player.blockPosition().getY() + yOffset);
+                    position.setZ(player.blockPosition().getZ() + zOffset);
+
+                    BlockEntity tile = player.level.getBlockEntity(position);
+                    if(tile != null){
+                        tile.getCapability(CapabilityEnergy.ENERGY, null).ifPresent(iEnergyStorage -> {
+                            energyAvailable.set(energyAvailable.get() - iEnergyStorage.receiveEnergy(energyAvailable.get(), false));
+                        });
+                        if(energyAvailable.get() <= 0){
+                            return energy;
+                        }
+                    }
+                }
+            }
+        }
+        return energy - (energy - energyAvailable.get());
     }
     
     public static class StackEnergyStorage implements IEnergyStorage, ICapabilityProvider {
