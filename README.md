@@ -22,7 +22,8 @@ It cycles through the modes from 0 to 3 and back to 0.
 
 ## Crafting  
 Crafting one battery is simple:  
-![crafting_bat](readme/crafting_bat.png)
+![crafting_bat](readme/crafting_bat.png)  
+(Use iron ingots instead of copper ingots for the 1.16.5 version)  
 
 But one battery mostly doesn't help a lot.  
 You need more capacity and faster transfer to progress, well there is a simple way of increasing those values.
