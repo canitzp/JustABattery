@@ -2,6 +2,7 @@
 
 - Recipe injection check, if the recipe already exists.
 - Localization changed "shift" to "sneak" to be more friendly with different keybindings
+- New versioning numbering, still compatible with semver, but now the major number is equal to the major of the used minecraft forge version
 
 **39.0.0:**
 
