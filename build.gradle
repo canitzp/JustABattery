@@ -27,6 +27,9 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
 
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             mods {
                 justabattery {
                     source sourceSets.main
@@ -70,11 +73,15 @@ repositories {
     maven {
         url "https://www.cursemaven.com"
     }
+    maven {
+        url "https://maven.blamejared.com"
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.forge_version}"
     implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
+    implementation fg.deobf("blusunrize.immersiveengineering:ImmersiveEngineering:1.18.1-7.1.1-pre.55")
 }
 
 jar {

@@ -196,31 +196,32 @@ public class BatteryItem extends Item {
             if(mode == 0){
                 return;
             }
-            
+
             List<ItemStack> energyItems = player.getInventory().items
                 .stream()
                 .filter(itemStack -> !ItemStack.isSameItemSameTags(itemStack, stack))
                 .filter(itemStack -> itemStack.getCapability(CapabilityEnergy.ENERGY).isPresent())
                 .collect(Collectors.toList());
-            if(energyItems.size() > 0){
-                int storedEnergy = getStoredEnergy(stack);
-                int maxTransferableEnergy = Math.min(storedEnergy, getMaxTransfer(stack));
-                int actualTransferredEnergy = 0;
-                switch(mode){
-                    case MODE_FIRST_FOUND -> actualTransferredEnergy = this.transferEnergyToFirstItem(maxTransferableEnergy, energyItems);
-                    case MODE_ALL -> actualTransferredEnergy = this.transferEnergyToAll(maxTransferableEnergy, energyItems);
-                    case MODE_RANDOM -> actualTransferredEnergy = this.transferEnergyRandom(maxTransferableEnergy, energyItems);
-                    case MODE_CHARGE_SURROUNDING_BLOCKS -> actualTransferredEnergy = this.transferEnergyToBlocks(maxTransferableEnergy, player);
-                }
-                if(actualTransferredEnergy > 0){
-                    BatteryItem.setStoredEnergy(stack, storedEnergy - actualTransferredEnergy);
-                }
+            int storedEnergy = getStoredEnergy(stack);
+            int maxTransferableEnergy = Math.min(storedEnergy, getMaxTransfer(stack));
+            int actualTransferredEnergy = 0;
+            switch(mode){
+                case MODE_FIRST_FOUND -> actualTransferredEnergy = this.transferEnergyToFirstItem(maxTransferableEnergy, energyItems);
+                case MODE_ALL -> actualTransferredEnergy = this.transferEnergyToAll(maxTransferableEnergy, energyItems);
+                case MODE_RANDOM -> actualTransferredEnergy = this.transferEnergyRandom(maxTransferableEnergy, energyItems);
+                case MODE_CHARGE_SURROUNDING_BLOCKS -> actualTransferredEnergy = this.transferEnergyToBlocks(maxTransferableEnergy, player);
+            }
+            if(actualTransferredEnergy > 0){
+                BatteryItem.setStoredEnergy(stack, storedEnergy - actualTransferredEnergy);
             }
         }
     }
     
     // return transferred energy
     private int transferEnergyToFirstItem(int energy, List<ItemStack> storages){
+        if(storages.isEmpty()){
+            return 0;
+        }
         AtomicInteger energyTransferred = new AtomicInteger(0);
         int index = 0;
         while(energyTransferred.get() == 0 && index < storages.size()){
@@ -234,6 +235,9 @@ public class BatteryItem extends Item {
     
     // return transferred energy
     private int transferEnergyToAll(int energy, List<ItemStack> storages){
+        if(storages.isEmpty()){
+            return 0;
+        }
         AtomicInteger energyTransferred = new AtomicInteger(0);
         List<ItemStack> stacksThatReallyWantSomeEnergy = storages.stream().filter(stack -> stack.getCapability(CapabilityEnergy.ENERGY).resolve().get().receiveEnergy(1, true) > 0).collect(Collectors.toList());
         if(stacksThatReallyWantSomeEnergy.size() > 0){
@@ -249,6 +253,9 @@ public class BatteryItem extends Item {
     
     // return transferred energy
     private int transferEnergyRandom(int energy, List<ItemStack> storages){
+        if(storages.isEmpty()){
+            return 0;
+        }
         AtomicInteger energyTransferred = new AtomicInteger(0);
         int index = new Random().nextInt(storages.size());
         storages.get(index).getCapability(CapabilityEnergy.ENERGY).ifPresent(energyReceiverStorage -> {
@@ -272,17 +279,20 @@ public class BatteryItem extends Item {
 
                     BlockEntity tile = player.level.getBlockEntity(position);
                     if(tile != null){
-                        tile.getCapability(CapabilityEnergy.ENERGY, null).ifPresent(iEnergyStorage -> {
-                            energyAvailable.set(energyAvailable.get() - iEnergyStorage.receiveEnergy(energyAvailable.get(), false));
-                        });
-                        if(energyAvailable.get() <= 0){
-                            return energy;
+                        for (Direction side : Direction.values()) {
+                            tile.getCapability(CapabilityEnergy.ENERGY, side).ifPresent(iEnergyStorage -> {
+                                energyAvailable.set(energyAvailable.get() - iEnergyStorage.receiveEnergy(energyAvailable.get(), false));
+                            });
+                            if(energyAvailable.get() <= 0){
+                                return energy;
+                            }
                         }
+
                     }
                 }
             }
         }
-        return energy - (energy - energyAvailable.get());
+        return energy - energyAvailable.get();
     }
     
     public static class StackEnergyStorage implements IEnergyStorage, ICapabilityProvider {

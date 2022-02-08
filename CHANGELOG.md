@@ -1,3 +1,7 @@
+**39.1.0:**
+
+- Add new mode to charge up surrounding blocks. (Closes #2)
+
 **39.0.0:**
 
 - Update to 1.18.1
