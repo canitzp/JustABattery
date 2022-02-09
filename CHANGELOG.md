@@ -1,3 +1,7 @@
+**39.2.0:**
+
+- Load-By-Lightning is a new feature, which charges up the battery, when struck by a lightning bolt. Closes (#1)
+
 **39.1.0:**
 
 - Add new mode to charge up surrounding blocks. (Closes #2)

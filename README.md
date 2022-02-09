@@ -43,3 +43,8 @@ Again you decide how much and where to put the batteries and nuggets.
 Well like already said, there are no rules on how to upgrade them.  
 You can mix the ingredients as you like, as long as it stays within the predefined bounds (Default: Level & Trace-width of 100).  
 ![mixitlikeyouwant](readme/mixitlikeyouwant.png)
+
+### Load-By-Lightning
+Yes like it says, you can charge up the battery with lightning bolts.
+Just be hit as a player, or the lightning strikes the battery on the ground directly, to gain a lot of energy.
+I have tested it and it seems to be around 500k FE per lightning bolt.

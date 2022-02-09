@@ -10,6 +10,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -87,7 +88,7 @@ public class BatteryItem extends Item {
     }
     
     public BatteryItem(){
-        super(new Properties().stacksTo(1).tab(JustABattery.TAB));
+        super(new Properties().stacksTo(1).tab(JustABattery.TAB).fireResistant());
     }
     
     @Override
@@ -155,31 +156,36 @@ public class BatteryItem extends Item {
     @Override
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> stacks){
         if(this.allowdedIn(tab)){
-            for(byte i = 1; i <= 5; i++){
-                ItemStack empty = this.getDefaultInstance();
-                setLevel(empty, i);
-                
-                ItemStack full = empty.copy();
-                setStoredEnergy(full, getCapacity(full));
-                
-                ItemStack emptyThickTraces = empty.copy();
-                setTraceWidth(emptyThickTraces, BATTERY_MAX_TRACE_WIDTH);
-                
-                ItemStack fullThickTraces = full.copy();
-                setTraceWidth(fullThickTraces, BATTERY_MAX_TRACE_WIDTH);
-                
-                stacks.add(empty);
-                stacks.add(full);
-                stacks.add(emptyThickTraces);
-                stacks.add(fullThickTraces);
-                // fill remaining row with empty stacks
-                for(int j = 5; j <= 9; j++){
-                    stacks.add(ItemStack.EMPTY);
-                }
+            for(int i = 1; i <= 5; i++){
+                addBatteryToCreativeTab(stacks, i);
             }
+            addBatteryToCreativeTab(stacks, JustAConfig.get().battery_max_level);
         }
     }
-    
+
+    private void addBatteryToCreativeTab(NonNullList<ItemStack> tabStacks, int level) {
+        ItemStack empty = this.getDefaultInstance();
+        setLevel(empty, level);
+
+        ItemStack full = empty.copy();
+        setStoredEnergy(full, getCapacity(full));
+
+        ItemStack emptyThickTraces = empty.copy();
+        setTraceWidth(emptyThickTraces, BATTERY_MAX_TRACE_WIDTH);
+
+        ItemStack fullThickTraces = full.copy();
+        setTraceWidth(fullThickTraces, BATTERY_MAX_TRACE_WIDTH);
+
+        tabStacks.add(empty);
+        tabStacks.add(full);
+        tabStacks.add(emptyThickTraces);
+        tabStacks.add(fullThickTraces);
+        // fill remaining row with empty stacks
+        for(int j = 5; j <= 9; j++){
+            tabStacks.add(ItemStack.EMPTY);
+        }
+    }
+
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt){
@@ -293,6 +299,14 @@ public class BatteryItem extends Item {
             }
         }
         return energy - energyAvailable.get();
+    }
+
+    public void struckByLightning(LightningBolt lightningBolt, ItemStack batteryStack){
+        int storedEnergy = BatteryItem.getStoredEnergy(batteryStack);
+        int capacity = BatteryItem.getCapacity(batteryStack);
+
+        int newEnergyLevel = Math.min(capacity, storedEnergy + 100_000);
+        BatteryItem.setStoredEnergy(batteryStack, newEnergyLevel);
     }
     
     public static class StackEnergyStorage implements IEnergyStorage, ICapabilityProvider {
