@@ -45,6 +45,8 @@ public class JustAConfig {
         public int battery_max_level = 100;
         public String _battery_max_trace_width = "How much times can the battery trace width be upgrades? Keep in mind that with every increase you get #battery_transfer more energy, that can be transferred per tick.";
         public int battery_max_trace_width = 100;
+        public String _allow_block_discharge = "The following value (true or false) defines if a battery is capable of extracting energy out of any energetic block.";
+        public boolean allow_block_discharge = true;
     }
 
 }

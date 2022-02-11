@@ -19,5 +19,6 @@
   "item.justabattery.desc.mode.3": "The energy is given to a random item.",
   "item.justabattery.name.mode.4": "Surrounding Blocks",
   "item.justabattery.desc.mode.4": "The energy is distributed to blocks surrounding the player.",
-  "item.justabattery.desc.energy": "Energy stored: %dFE/%dFE"
+  "item.justabattery.desc.energy": "Energy stored: %dFE/%dFE",
+  "item.justabattery.desc.energy_received_from_block": "Received %dFE from %s"
 }

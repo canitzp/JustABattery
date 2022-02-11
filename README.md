@@ -55,3 +55,17 @@ You can mix the ingredients as you like, as long as it stays within the predefin
 Yes like it says, you can charge up the battery with lightning bolts.
 Just be hit as a player, or the lightning strikes the battery on the ground directly, to gain a lot of energy.
 I have tested it and it seems to be around 500k FE per lightning bolt.
+
+### Extracting from blocks
+It is possible to extract energy from all blocks, that can store energy and also can transfer that energy to others.
+These are mostly capacitor blocks or accumulators and things like machines (powered furnace) won't work.
+
+The only thing you have to do is to right-click with a battery in your hand on the block.
+
+Keep in mind that sometimes the clicked side does matter!
+For example on an Immersive Engineering Accumulator, you have to click on a side, configured as output!
+
+The amount of transferred energy depends on the "trace width" attribute of the battery as well as the maximum transfer rate of the block.
+The lower value is chosen.
+
+This behaviour can be disabled inside the JustABattery configuration ("allow_block_discharge").

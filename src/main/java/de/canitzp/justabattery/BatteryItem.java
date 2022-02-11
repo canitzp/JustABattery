@@ -135,7 +135,40 @@ public class BatteryItem extends Item {
     public boolean isFoil(ItemStack stack){
         return getMode(stack) > MODE_NONE;
     }
-    
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        if(!JustAConfig.get().allow_block_discharge){
+            return super.useOn(context);
+        }
+        if(context.getPlayer() == null){
+            return super.useOn(context);
+        }
+        if(context.getLevel().isClientSide){
+            return super.useOn(context);
+        }
+        BlockEntity blockEntity = context.getLevel().getBlockEntity(context.getClickedPos());
+        if (blockEntity == null) {
+            return super.useOn(context);
+        }
+        LazyOptional<IEnergyStorage> cap = blockEntity.getCapability(CapabilityEnergy.ENERGY, context.getClickedFace());
+        if (!cap.isPresent()) {
+            return super.useOn(context);
+        }
+        cap.ifPresent(iEnergyStorage -> {
+            ItemStack battery = context.getItemInHand();
+            int maxReceivableEnergy = Math.min(BatteryItem.getMaxTransfer(battery), BatteryItem.getCapacity(battery) - BatteryItem.getStoredEnergy(battery));
+            if(maxReceivableEnergy > 0){
+                int extractedEnergy = iEnergyStorage.extractEnergy(maxReceivableEnergy, false);
+                if(extractedEnergy > 0){
+                    BatteryItem.setStoredEnergy(context.getItemInHand(), BatteryItem.getStoredEnergy(battery) + extractedEnergy);
+                    context.getPlayer().sendMessage(new TranslatableComponent("item.justabattery.desc.energy_received_from_block", extractedEnergy, context.getLevel().getBlockState(context.getClickedPos()).getBlock().getName()), context.getPlayer().getUUID());
+                }
+            }
+        });
+        return InteractionResult.SUCCESS;
+    }
+
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context){
         if(context.getPlayer() != null && context.getPlayer().isCrouching()){
