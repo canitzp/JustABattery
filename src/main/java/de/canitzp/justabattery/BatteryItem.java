@@ -11,6 +11,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -167,6 +169,32 @@ public class BatteryItem extends Item {
             }
         });
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public boolean hurtEnemy(ItemStack stack, LivingEntity victim, LivingEntity attacker) {
+        if(victim.level.isClientSide){
+            return super.hurtEnemy(stack, victim, attacker);
+        }
+        int chargupEnergy = JustAConfig.get().chargeup_creeper_energy_required;
+        if(chargupEnergy >= 0){
+            if(attacker instanceof Player){
+                if(victim instanceof Creeper creeper){
+                    if(!creeper.isPowered()){
+                        int storedEnergy = BatteryItem.getStoredEnergy(stack);
+                        if(storedEnergy >= chargupEnergy){
+                            CompoundTag tag = new CompoundTag();
+                            creeper.addAdditionalSaveData(tag);
+                            tag.putBoolean("powered", true);
+                            creeper.readAdditionalSaveData(tag);
+                            BatteryItem.setStoredEnergy(stack, storedEnergy - chargupEnergy);
+                            attacker.sendMessage(new TranslatableComponent("item.justabattery.desc.charged_creeper"), attacker.getUUID());
+                        }
+                    }
+                }
+            }
+        }
+        return super.hurtEnemy(stack, victim, attacker);
     }
 
     @Override

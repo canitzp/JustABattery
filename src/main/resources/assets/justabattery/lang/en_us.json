@@ -20,5 +20,6 @@
   "item.justabattery.name.mode.4": "Surrounding Blocks",
   "item.justabattery.desc.mode.4": "The energy is distributed to blocks surrounding the player.",
   "item.justabattery.desc.energy": "Energy stored: %dFE/%dFE",
-  "item.justabattery.desc.energy_received_from_block": "Received %dFE from %s"
+  "item.justabattery.desc.energy_received_from_block": "Received %dFE from %s",
+  "item.justabattery.desc.charged_creeper": "Creeper was charged!"
 }

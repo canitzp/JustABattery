@@ -69,3 +69,9 @@ The amount of transferred energy depends on the "trace width" attribute of the b
 The lower value is chosen.
 
 This behaviour can be disabled inside the JustABattery configuration ("allow_block_discharge").
+
+### Creeper charging
+Be carefully when attacking a creeper.
+If you have your battery in hand and it is charged up enough, you could end up powering the creeper.
+
+This behaviour can be disabled inside the JustABattery configuration ("chargeup_creeper_energy_required").

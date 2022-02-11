@@ -2,6 +2,7 @@
 
 - Load-By-Lightning is a new feature, which charges up the battery, when struck by a lightning bolt. Closes (#1)
 - Block-Extraction allows the player to charge the battery, by discharging an energetic block. Closes (#3)
+- Creeper-Powering gives the ability to upgrade a normal creeper to a powered/charged one. Closes (#6)
 
 **39.1.0:**
 
