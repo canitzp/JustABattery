@@ -1,3 +1,7 @@
+**40.0.0:**
+
+- Update to 1.18.2 (Forge 40.0.3), not compatible with lower versions
+
 **39.2.0:**
 
 - Load-By-Lightning is a new feature, which charges up the battery, when struck by a lightning bolt. Closes (#1)
