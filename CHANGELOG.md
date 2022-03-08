@@ -1,3 +1,8 @@
+**40.1.0**
+
+- Batteries can now be put into any CuriousAPI slot. (#8)
+  - If a battery is in there, it **cannot** be charged, but it can be discharged
+
 **40.0.0:**
 
 - Update to 1.18.2 (Forge 40.0.3), not compatible with lower versions
