@@ -1,3 +1,7 @@
+**40.2.0**
+
+- New textures :yay: thanks to [Ganpan14O](https://www.curseforge.com/members/ganpan14o)
+
 **40.1.0**
 
 - Batteries can now be put into any CuriousAPI slot. (#8)
