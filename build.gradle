@@ -1,15 +1,10 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: "${project.forge_gradle_version}", changing: true
-    }
+plugins {
+    id "java"
+    id "idea"
+    id "net.minecraftforge.gradle" version "5.1.+"
+    id "com.modrinth.minotaur" version "2.+"
+    id 'net.darkhax.curseforgegradle' version '1.+'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'maven-publish'
-apply plugin: 'idea'
 
 version = "${project.mod_version}"
 group = "${project.mod_namespace}"
@@ -117,4 +112,34 @@ idea {
     module {
         inheritOutputDirs = true
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "hzegx5nn"
+    versionNumber = "${project.mod_version}"
+    versionName = "Just A Battery - ${project.mod_version} (for 1.18.2)"
+    versionType = "release"
+    uploadFile = jar
+    gameVersions = ["1.18.2"]
+    loaders = ["forge"]
+    changelog = rootProject.file("CHANGELOG.md").text
+    syncBodyFrom = rootProject.file("README.md").text
+}
+
+tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
+
+//noinspection UnnecessaryQualifiedReference
+task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    group = "publishing"
+    apiToken = System.getenv('CURSEFORGE_TOKEN')
+
+    def mainFile = upload(509638, jar)
+    mainFile.displayName = "Just A Battery - ${project.mod_version} (for 1.18.2)"
+    mainFile.releaseType = "release"
+    mainFile.changelogType = 'markdown'
+    mainFile.changelog = file("CHANGELOG.md")
+    mainFile.addModLoader("Forge")
+    mainFile.addJavaVersion("Java 17")
+    mainFile.addGameVersion("1.18.2")
 }
