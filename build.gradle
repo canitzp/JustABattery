@@ -15,7 +15,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
     
 minecraft {
-    mappings channel: 'official', version: '1.18.2'
+    mappings channel: 'official', version: '1.19'
 
     runs {
         client {
@@ -118,10 +118,10 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "hzegx5nn"
     versionNumber = "${project.mod_version}"
-    versionName = "Just A Battery - ${project.mod_version} (for 1.18.2)"
+    versionName = "Just A Battery - ${project.mod_version} (for 1.19)"
     versionType = "release"
     uploadFile = jar
-    gameVersions = ["1.18.2"]
+    gameVersions = ["1.19"]
     loaders = ["forge"]
     changelog = rootProject.file("CHANGELOG.md").text
     syncBodyFrom = rootProject.file("README.md").text
@@ -135,11 +135,11 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     apiToken = System.getenv('CURSEFORGE_TOKEN')
 
     def mainFile = upload(509638, jar)
-    mainFile.displayName = "Just A Battery - ${project.mod_version} (for 1.18.2)"
+    mainFile.displayName = "Just A Battery - ${project.mod_version} (for 1.19)"
     mainFile.releaseType = "release"
     mainFile.changelogType = 'markdown'
     mainFile.changelog = file("CHANGELOG.md")
     mainFile.addModLoader("Forge")
     mainFile.addJavaVersion("Java 17")
-    mainFile.addGameVersion("1.18.2")
+    mainFile.addGameVersion("1.19")
 }

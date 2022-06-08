@@ -2,6 +2,7 @@
 
 ### Support:
 
+- 1.19: fully supported
 - 1.18.2: fully supported
 - 1.18/1.18.1: not supported
 - 1.17.1: not supported

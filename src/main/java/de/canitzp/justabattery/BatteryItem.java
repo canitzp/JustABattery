@@ -7,7 +7,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -97,26 +96,26 @@ public class BatteryItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag){
         super.appendHoverText(stack, level, tooltip, flag);
     
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
+        tooltip.add(Component.translatable("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
+        tooltip.add(Component.translatable("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
     
         byte mode = getMode(stack);
-        tooltip.add(new TranslatableComponent("item.justabattery.prefix.mode").append(" ").append(new TranslatableComponent("item.justabattery.name.mode." + mode)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.mode." + mode).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.add(Component.translatable("item.justabattery.prefix.mode").append(" ").append(Component.translatable("item.justabattery.name.mode." + mode)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.add(Component.translatable("item.justabattery.desc.mode." + mode).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
         
-        tooltip.add(new TranslatableComponent("item.justabattery.desc.energy", getStoredEnergy(stack),getCapacity(stack)).withStyle(ChatFormatting.RED));
+        tooltip.add(Component.translatable("item.justabattery.desc.energy", getStoredEnergy(stack),getCapacity(stack)).withStyle(ChatFormatting.RED));
     }
     
     @Override
     public Component getName(ItemStack stack){
         MutableComponent primary = null;
-        MutableComponent secondary = new TranslatableComponent(this.getDescriptionId(stack));
+        MutableComponent secondary = Component.translatable(this.getDescriptionId(stack));
     
         int level = getLevel(stack);
         if(level >= 2 && level <= 5){
-            primary = new TranslatableComponent("item.justabattery.name.prefix." + level);
+            primary = Component.translatable("item.justabattery.name.prefix." + level);
         } else if (level > 5){
-            primary = new TranslatableComponent("item.justabattery.name.prefix", level);
+            primary = Component.translatable("item.justabattery.name.prefix", level);
         }
         
         return primary != null ? primary.append(" ").append(secondary) : secondary;
@@ -127,7 +126,7 @@ public class BatteryItem extends Item {
         byte mode = getMode(stack);
         if(mode >= MODE_FIRST_FOUND && mode <= MODE_CHARGE_SURROUNDING_BLOCKS){
             if(displayName instanceof MutableComponent mutableComponent){
-                mutableComponent.append(" - ").append(new TranslatableComponent("item.justabattery.prefix.mode")).append(" ").append(new TranslatableComponent("item.justabattery.name.mode." + mode));
+                mutableComponent.append(" - ").append(Component.translatable("item.justabattery.prefix.mode")).append(" ").append(Component.translatable("item.justabattery.name.mode." + mode));
             }
         }
         return super.getHighlightTip(stack, displayName);
@@ -164,7 +163,7 @@ public class BatteryItem extends Item {
                 int extractedEnergy = iEnergyStorage.extractEnergy(maxReceivableEnergy, false);
                 if(extractedEnergy > 0){
                     BatteryItem.setStoredEnergy(context.getItemInHand(), BatteryItem.getStoredEnergy(battery) + extractedEnergy);
-                    context.getPlayer().sendMessage(new TranslatableComponent("item.justabattery.desc.energy_received_from_block", extractedEnergy, context.getLevel().getBlockState(context.getClickedPos()).getBlock().getName()), context.getPlayer().getUUID());
+                    context.getPlayer().sendSystemMessage(Component.translatable("item.justabattery.desc.energy_received_from_block", extractedEnergy, context.getLevel().getBlockState(context.getClickedPos()).getBlock().getName()));
                 }
             }
         });
@@ -188,7 +187,7 @@ public class BatteryItem extends Item {
                             tag.putBoolean("powered", true);
                             creeper.readAdditionalSaveData(tag);
                             BatteryItem.setStoredEnergy(stack, storedEnergy - chargupEnergy);
-                            attacker.sendMessage(new TranslatableComponent("item.justabattery.desc.charged_creeper"), attacker.getUUID());
+                            attacker.sendSystemMessage(Component.translatable("item.justabattery.desc.charged_creeper"));
                         }
                     }
                 }
@@ -207,7 +206,6 @@ public class BatteryItem extends Item {
                     mode = MODE_NONE;
                 }
                 setMode(stack, mode);
-                
             }
             return InteractionResult.SUCCESS;
         }
@@ -216,7 +214,7 @@ public class BatteryItem extends Item {
     
     @Override
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> stacks){
-        if(this.allowdedIn(tab)){
+        if(this.allowedIn(tab)){
             for(int i = 1; i <= 5; i++){
                 addBatteryToCreativeTab(stacks, i);
             }

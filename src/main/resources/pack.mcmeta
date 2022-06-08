@@ -1,6 +1,8 @@
 {
    "pack":{
+      "description": "JustABattery Resources",
       "pack_format": 9,
-      "description": "JustABattery Resources"
+      "forge:resource_pack_format": 9,
+      "forge:data_pack_format": 10
    }
 }

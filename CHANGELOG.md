@@ -1,3 +1,7 @@
+**41.0.0**
+
+- Update to 1.19
+
 **40.2.0**
 
 - New textures :yay: thanks to [Ganpan14O](https://www.curseforge.com/members/ganpan14o)
