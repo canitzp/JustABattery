@@ -1,3 +1,7 @@
+**41.0.1**
+
+- Fix forge breaking changes within Forge 41.0.94
+
 **41.0.0**
 
 - Update to 1.19

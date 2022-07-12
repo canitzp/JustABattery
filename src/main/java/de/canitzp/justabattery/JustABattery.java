@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -68,8 +68,8 @@ public class JustABattery {
     }
     
     @SubscribeEvent
-    public static void onWorldLoad(WorldEvent.Load event){
-        LevelAccessor levelAccessor = event.getWorld();
+    public static void onWorldLoad(LevelEvent.Load event){
+        LevelAccessor levelAccessor = event.getLevel();
         if(levelAccessor instanceof Level level){
             if(level.dimension() != Level.OVERWORLD){
                 return;
