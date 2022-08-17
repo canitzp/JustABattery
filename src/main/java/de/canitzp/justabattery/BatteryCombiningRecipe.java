@@ -96,10 +96,10 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     @Override
     public ItemStack assemble(CraftingContainer inv){
         ItemStack output = super.getResultItem().copy();
-        // levels are combined; cast to byte is safe, as long as the matches() method is called
-        BatteryItem.setLevel(output, (byte) this.getCombinedLevel(inv));
+        // levels are combined
+        BatteryItem.setLevel(output, this.getCombinedLevel(inv));
         // the greatest of the both trace widths is chosen
-        BatteryItem.setTraceWidth(output, (byte) (this.getMaxTraceWidth(inv) + this.getGoldNuggetAmount(inv)));
+        BatteryItem.setTraceWidth(output, (this.getMaxTraceWidth(inv) + this.getGoldNuggetAmount(inv)));
         // stored energy is combined
         BatteryItem.setStoredEnergy(output, this.getCombinedEnergy(inv));
         
@@ -116,13 +116,13 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
             return false;
         }
         
-        if(this.getCombinedLevel(inv) > BatteryItem.BATTERY_MAX_LEVEL){
+        if(this.getCombinedLevel(inv) > BatteryItem.getBatteryMaxLevel()){
             return false;
         }
-        if(this.getMaxTraceWidth(inv) + this.getGoldNuggetAmount(inv) > BatteryItem.BATTERY_MAX_TRACE_WIDTH){
+        if(this.getMaxTraceWidth(inv) + this.getGoldNuggetAmount(inv) > BatteryItem.getBatteryMaxTraceWidth()){
             return false;
         }
-        
+
         return true;
     }
     

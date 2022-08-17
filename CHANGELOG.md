@@ -1,3 +1,8 @@
+**43.0.0**
+
+- Update to 1.19.2
+- Fix "Batteries Cannot Be Crafted Above 127-Cells" Fixes #9
+
 **41.0.1**
 
 - Fix forge breaking changes within Forge 41.0.94

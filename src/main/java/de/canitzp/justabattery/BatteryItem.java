@@ -34,18 +34,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class BatteryItem extends Item {
-    
-    public static final int BATTERY_INITIAL_CAPACITY = JustAConfig.get().battery_capacity;
-    public static final int BATTERY_STAGED_TRANSFER = JustAConfig.get().battery_transfer;
-    public static final int BATTERY_MAX_LEVEL = JustAConfig.get().battery_max_level;
-    public static final int BATTERY_MAX_TRACE_WIDTH = JustAConfig.get().battery_max_trace_width;
-    
+
     public static final byte MODE_NONE = 0;
     public static final byte MODE_FIRST_FOUND = 1;
     public static final byte MODE_ALL = 2;
     public static final byte MODE_RANDOM = 3;
     public static final byte MODE_CHARGE_SURROUNDING_BLOCKS = 4;
-    
+
+    public static int getBatteryInitialCapacity(){
+        return Math.max(1, Math.min(100_000, JustAConfig.get().battery_capacity));
+    }
+
+    public static int getBatteryStagedTransfer(){
+        return Math.max(0, Math.min(100_000, JustAConfig.get().battery_transfer));
+    }
+
+    public static int getBatteryMaxLevel(){
+        return Math.max(1, Math.min(20_000, JustAConfig.get().battery_max_level));
+    }
+
+    public static int getBatteryMaxTraceWidth(){
+        return Math.max(1, Math.min(20_000, JustAConfig.get().battery_max_trace_width));
+    }
+
     public static int getStoredEnergy(ItemStack stack){
         return stack.getOrCreateTag().getInt("Energy");
     }
@@ -55,11 +66,11 @@ public class BatteryItem extends Item {
     }
     
     public static int getCapacity(ItemStack stack){
-        return BATTERY_INITIAL_CAPACITY * getLevel(stack);
+        return getBatteryInitialCapacity() * getLevel(stack);
     }
     
     public static int getMaxTransfer(ItemStack stack){
-        return BATTERY_STAGED_TRANSFER * getTraceWidth(stack);
+        return getBatteryStagedTransfer() * getTraceWidth(stack);
     }
     
     public static byte getMode(ItemStack stack){
@@ -218,7 +229,7 @@ public class BatteryItem extends Item {
             for(int i = 1; i <= 5; i++){
                 addBatteryToCreativeTab(stacks, i);
             }
-            addBatteryToCreativeTab(stacks, JustAConfig.get().battery_max_level);
+            addBatteryToCreativeTab(stacks, getBatteryMaxLevel());
         }
     }
 
@@ -230,10 +241,10 @@ public class BatteryItem extends Item {
         setStoredEnergy(full, getCapacity(full));
 
         ItemStack emptyThickTraces = empty.copy();
-        setTraceWidth(emptyThickTraces, BATTERY_MAX_TRACE_WIDTH);
+        setTraceWidth(emptyThickTraces, getBatteryMaxTraceWidth());
 
         ItemStack fullThickTraces = full.copy();
-        setTraceWidth(fullThickTraces, BATTERY_MAX_TRACE_WIDTH);
+        setTraceWidth(fullThickTraces, getBatteryMaxTraceWidth());
 
         tabStacks.add(empty);
         tabStacks.add(full);

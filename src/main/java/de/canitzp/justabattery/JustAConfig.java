@@ -37,13 +37,13 @@ public class JustAConfig {
     }
     
     public static class Format {
-        public String _battery_capacity = "This defines the battery capacity per cell. When combining cells, the values are multiplied. Basically the real capacity is this value times the level.";
+        public String _battery_capacity = "This defines the battery capacity per cell. When combining cells, the values are multiplied. Basically the real capacity is this value times the level. Range: 1-100_000 Default: 20_000";
         public int battery_capacity = 20_000;
-        public String _battery_transfer = "This defines the max transfer rate per cell. This can be increased  and with every increase the value is added. Like the battery capacity, but with trace_width as defining value.";
+        public String _battery_transfer = "This defines the max transfer rate per cell. This can be increased  and with every increase the value is added. Like the battery capacity, but with trace_width as defining value. Range: 0-100_000 Default: 500";
         public int battery_transfer = 500;
-        public String _battery_max_level = "How much times can the battery be upgrades? Keep in mind that with every level you get #battery_capacity more energy, that can be stored.";
+        public String _battery_max_level = "How much times can the battery be upgrades? Keep in mind that with every level you get #battery_capacity more energy, that can be stored. Range: 1-20_000 Default: 100";
         public int battery_max_level = 100;
-        public String _battery_max_trace_width = "How much times can the battery trace width be upgrades? Keep in mind that with every increase you get #battery_transfer more energy, that can be transferred per tick.";
+        public String _battery_max_trace_width = "How much times can the battery trace width be upgrades? Keep in mind that with every increase you get #battery_transfer more energy, that can be transferred per tick. Range: 1-20_000 Default: 100";
         public int battery_max_trace_width = 100;
         public String _allow_block_discharge = "The following value (true or false) defines if a battery is capable of extracting energy out of any energetic block.";
         public boolean allow_block_discharge = true;

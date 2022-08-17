@@ -10,12 +10,13 @@ version = "${project.mod_version}"
 group = "${project.mod_namespace}"
 archivesBaseName = "${project.mod_name}"
 
+// Mojang ships Java 17 to end users in 1.18+ instead of Java 8 in 1.16.x or lower nor 16 in 1.17.x, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
     
 minecraft {
-    mappings channel: 'official', version: '1.19'
+    mappings channel: 'official', version: project.mc_version
 
     runs {
         client {
@@ -35,21 +36,6 @@ minecraft {
         server {
             workingDirectory project.file('run_server')
             property 'forge.logging.console.level', 'debug'
-
-            mods {
-                justabattery {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            workingDirectory project.file('run_gametest')
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'justabattery'
 
             mods {
                 justabattery {
@@ -80,24 +66,17 @@ repositories {
     maven {
         url = "https://dvs1.progwml6.com/files/maven"
     }
-    maven {
-        url "https://www.cursemaven.com"
-    }
-    maven {
-        url "https://maven.blamejared.com"
-    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.forge_version}"
-    //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
-    //implementation fg.deobf("blusunrize.immersiveengineering:ImmersiveEngineering:1.18.1-7.1.1-pre.55")
+    implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 
 jar {
     manifest {
         attributes([
-                "Specification-Title": "JustABattery",
+                "Specification-Title": project.mod_name,
                 "Specification-Vendor": "canitzp",
                 "Specification-Version": "1",
                 "Implementation-Title": project.name,
@@ -118,10 +97,10 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "hzegx5nn"
     versionNumber = "${project.mod_version}"
-    versionName = "Just A Battery - ${project.mod_version} (for 1.19)"
+    versionName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
     versionType = "release"
     uploadFile = jar
-    gameVersions = ["1.19"]
+    gameVersions = ["${project.mc_version}"]
     loaders = ["forge"]
     changelog = rootProject.file("CHANGELOG.md").text
     syncBodyFrom = rootProject.file("README.md").text
@@ -135,11 +114,11 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     apiToken = System.getenv('CURSEFORGE_TOKEN')
 
     def mainFile = upload(509638, jar)
-    mainFile.displayName = "Just A Battery - ${project.mod_version} (for 1.19)"
+    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
     mainFile.releaseType = "release"
     mainFile.changelogType = 'markdown'
     mainFile.changelog = file("CHANGELOG.md")
     mainFile.addModLoader("Forge")
     mainFile.addJavaVersion("Java 17")
-    mainFile.addGameVersion("1.19")
+    mainFile.addGameVersion("${project.mc_version}")
 }
