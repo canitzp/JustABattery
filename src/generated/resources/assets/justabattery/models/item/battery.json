@@ -1,0 +1,393 @@
+{
+  "parent": "minecraft:item/handheld",
+  "overrides": [
+    {
+      "model": "justabattery:item/single/battery_single_empty",
+      "predicate": {
+        "justabattery:level": 0.0,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_10",
+      "predicate": {
+        "justabattery:level": 0.1,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_20",
+      "predicate": {
+        "justabattery:level": 0.2,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_30",
+      "predicate": {
+        "justabattery:level": 0.3,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_40",
+      "predicate": {
+        "justabattery:level": 0.4,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_50",
+      "predicate": {
+        "justabattery:level": 0.5,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_60",
+      "predicate": {
+        "justabattery:level": 0.6,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_70",
+      "predicate": {
+        "justabattery:level": 0.7,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_80",
+      "predicate": {
+        "justabattery:level": 0.8,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_90",
+      "predicate": {
+        "justabattery:level": 0.9,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/single/battery_single_full",
+      "predicate": {
+        "justabattery:level": 1.0,
+        "justabattery:size": 1.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_empty",
+      "predicate": {
+        "justabattery:level": 0.0,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_10",
+      "predicate": {
+        "justabattery:level": 0.1,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_20",
+      "predicate": {
+        "justabattery:level": 0.2,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_30",
+      "predicate": {
+        "justabattery:level": 0.3,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_40",
+      "predicate": {
+        "justabattery:level": 0.4,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_50",
+      "predicate": {
+        "justabattery:level": 0.5,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_60",
+      "predicate": {
+        "justabattery:level": 0.6,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_70",
+      "predicate": {
+        "justabattery:level": 0.7,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_80",
+      "predicate": {
+        "justabattery:level": 0.8,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_90",
+      "predicate": {
+        "justabattery:level": 0.9,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/double/battery_double_full",
+      "predicate": {
+        "justabattery:level": 1.0,
+        "justabattery:size": 2.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_empty",
+      "predicate": {
+        "justabattery:level": 0.0,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_10",
+      "predicate": {
+        "justabattery:level": 0.1,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_20",
+      "predicate": {
+        "justabattery:level": 0.2,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_30",
+      "predicate": {
+        "justabattery:level": 0.3,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_40",
+      "predicate": {
+        "justabattery:level": 0.4,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_50",
+      "predicate": {
+        "justabattery:level": 0.5,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_60",
+      "predicate": {
+        "justabattery:level": 0.6,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_70",
+      "predicate": {
+        "justabattery:level": 0.7,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_80",
+      "predicate": {
+        "justabattery:level": 0.8,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_90",
+      "predicate": {
+        "justabattery:level": 0.9,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/triple/battery_triple_full",
+      "predicate": {
+        "justabattery:level": 1.0,
+        "justabattery:size": 3.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_empty",
+      "predicate": {
+        "justabattery:level": 0.0,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_10",
+      "predicate": {
+        "justabattery:level": 0.1,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_20",
+      "predicate": {
+        "justabattery:level": 0.2,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_30",
+      "predicate": {
+        "justabattery:level": 0.3,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_40",
+      "predicate": {
+        "justabattery:level": 0.4,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_50",
+      "predicate": {
+        "justabattery:level": 0.5,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_60",
+      "predicate": {
+        "justabattery:level": 0.6,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_70",
+      "predicate": {
+        "justabattery:level": 0.7,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_80",
+      "predicate": {
+        "justabattery:level": 0.8,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_90",
+      "predicate": {
+        "justabattery:level": 0.9,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quad/battery_quad_full",
+      "predicate": {
+        "justabattery:level": 1.0,
+        "justabattery:size": 4.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_empty",
+      "predicate": {
+        "justabattery:level": 0.0,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_10",
+      "predicate": {
+        "justabattery:level": 0.1,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_20",
+      "predicate": {
+        "justabattery:level": 0.2,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_30",
+      "predicate": {
+        "justabattery:level": 0.3,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_40",
+      "predicate": {
+        "justabattery:level": 0.4,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_50",
+      "predicate": {
+        "justabattery:level": 0.5,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_60",
+      "predicate": {
+        "justabattery:level": 0.6,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_70",
+      "predicate": {
+        "justabattery:level": 0.7,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_80",
+      "predicate": {
+        "justabattery:level": 0.8,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_90",
+      "predicate": {
+        "justabattery:level": 0.9,
+        "justabattery:size": 5.0
+      }
+    },
+    {
+      "model": "justabattery:item/quint/battery_quint_full",
+      "predicate": {
+        "justabattery:level": 1.0,
+        "justabattery:size": 5.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "justabattery:item/single/battery_single_empty"
+  }
+}

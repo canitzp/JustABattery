@@ -1,5 +1,5 @@
 {
-  "itemGroup.justabattery": "Just a Battery",
+  "tab.justabattery": "Just a Battery",
   "item.justabattery.battery": "Battery",
   "item.justabattery.name.prefix": "%d-Cell",
   "item.justabattery.name.prefix.2": "Double",

@@ -1,7 +1,7 @@
 ///Russian lang added by DrHesperus
 ///P.S: Write the text is more correctly. E.g - item.justabattery.name.mode.0 and more...
 {
-  "itemGroup.justabattery": "Just a Battery",
+  "tab.justabattery": "Just a Battery",
 
   "item.justabattery.battery": "Батарейка",
   "item.justabattery.name.prefix": "%d-ячейка",

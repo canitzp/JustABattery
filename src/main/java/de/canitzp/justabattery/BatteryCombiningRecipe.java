@@ -4,6 +4,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
@@ -17,7 +18,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     public static final BatteryCombiningRecipe INSTANCE = new BatteryCombiningRecipe();
     
     private BatteryCombiningRecipe(){
-        super(ID, "", JustABattery.BATTERY_ITEM.get().getDefaultInstance(), INPUTS);
+        super(ID, "", CraftingBookCategory.EQUIPMENT, JustABattery.BATTERY_ITEM.get().getDefaultInstance(), INPUTS);
     }
     
     @Override
