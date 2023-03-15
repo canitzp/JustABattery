@@ -23,7 +23,7 @@ public class JustABatteryTab {
         });
     }
 
-    private static void addItemsToDisplay(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean hasOp){
+    private static void addItemsToDisplay(CreativeModeTab.ItemDisplayParameters parameters, CreativeModeTab.Output output){
         for(int i = 1; i <= 5; i++){
             JustABatteryTab.addBatteryToCreativeTab(output, i);
         }

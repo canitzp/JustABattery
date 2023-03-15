@@ -1,3 +1,6 @@
+45.0.0:
+- Update to 1.19.4 (Not backwards compatible)
+
 44.0.0:
 - Update to 1.19.3 (Not backwards compatible)
 
