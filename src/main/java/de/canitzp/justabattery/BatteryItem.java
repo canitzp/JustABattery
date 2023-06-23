@@ -181,7 +181,7 @@ public class BatteryItem extends Item {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity victim, LivingEntity attacker) {
-        if(victim.level.isClientSide){
+        if(victim.level().isClientSide){
             return super.hurtEnemy(stack, victim, attacker);
         }
         int chargupEnergy = JustAConfig.get().chargeup_creeper_energy_required;
@@ -318,7 +318,7 @@ public class BatteryItem extends Item {
                     position.setY(player.blockPosition().getY() + yOffset);
                     position.setZ(player.blockPosition().getZ() + zOffset);
 
-                    BlockEntity tile = player.level.getBlockEntity(position);
+                    BlockEntity tile = player.level().getBlockEntity(position);
                     if(tile != null){
                         for (Direction side : Direction.values()) {
                             tile.getCapability(ForgeCapabilities.ENERGY, side).ifPresent(iEnergyStorage -> {

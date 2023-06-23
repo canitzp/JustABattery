@@ -1,14 +1,17 @@
 plugins {
     id "java"
     id "idea"
-    id "net.minecraftforge.gradle" version "5.1.+"
+    id "net.minecraftforge.gradle" version "[6.0,6.2)"
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id "com.modrinth.minotaur" version "2.+"
     id 'net.darkhax.curseforgegradle' version '1.+'
 }
 
 version = "${project.mod_version}"
 group = "${project.mod_namespace}"
-archivesBaseName = "${project.mod_name}"
+base {
+    archivesName = "${project.mod_name}"
+}
 
 // Mojang ships Java 17 to end users in 1.18+ instead of Java 8 in 1.16.x or lower nor 16 in 1.17.x, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -16,7 +19,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
     
 minecraft {
-    mappings channel: 'official', version: project.mc_version
+    mappings channel: 'parchment', version: "1.19.3-2023.03.12-1.20"
+
+    copyIdeResources = true
 
     runs {
         client {
@@ -64,13 +69,31 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
-        url = "https://dvs1.progwml6.com/files/maven"
+        url = "https://maven.blamejared.com/"
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.forge_version}"
     //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
+}
+
+
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+// When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
+// See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+def resourceTargets = ['META-INF/mods.toml']
+def replaceProperties = [
+        mod_version: "${project.mod_version}"
+]
+processResources {
+    inputs.properties replaceProperties
+    replaceProperties.put 'project', project
+
+    filesMatching(resourceTargets) {
+        expand replaceProperties
+    }
 }
 
 jar {
@@ -87,6 +110,10 @@ jar {
     }
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
 idea {
     module {
         inheritOutputDirs = true
@@ -97,11 +124,11 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "hzegx5nn"
     versionNumber = "${project.mod_version}"
-    versionName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
+    versionName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
     versionType = "release"
     uploadFile = jar
-    gameVersions = ["${project.mc_version}"]
-    loaders = ["forge"]
+    gameVersions = project.release_minecraft_versions.split("/").collect()
+    loaders = project.release_mod_loaders.toLowerCase().split("/").collect()
     changelog = String.join("\n", rootProject.file("CHANGELOG.md").text.lines().takeWhile(s -> !s.isEmpty()).toList())
     syncBodyFrom = rootProject.file("README.md").text
 }
@@ -114,11 +141,17 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     apiToken = System.getenv('CURSEFORGE_TOKEN')
 
     def mainFile = upload(509638, jar)
-    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
+    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
     mainFile.releaseType = "release"
     mainFile.changelogType = 'markdown'
     mainFile.changelog = file("CHANGELOG.md")
-    mainFile.addModLoader("Forge")
-    mainFile.addJavaVersion("Java 17")
-    mainFile.addGameVersion("${project.mc_version}")
+    for (final def modloader in "${project.release_mod_loaders}".split("/")) {
+        mainFile.addModLoader("${modloader}")
+    }
+    for (final def java_version in "${project.release_java_versions}".split("/")) {
+        mainFile.addJavaVersion("${java_version}")
+    }
+    for (final def minecraft_version in "${project.release_minecraft_versions}".split("/")) {
+        mainFile.addGameVersion("${minecraft_version}")
+    }
 }

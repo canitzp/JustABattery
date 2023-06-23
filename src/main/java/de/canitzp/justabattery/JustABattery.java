@@ -1,9 +1,11 @@
 package de.canitzp.justabattery;
 
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -32,12 +34,15 @@ public class JustABattery {
     public static final String MODID = "justabattery";
     
     public static final Logger LOGGER = LogManager.getLogger(MODID);
-    
+
+    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    public static final RegistryObject<CreativeModeTab> TAB = TABS.register("tab", JustABatteryTab::create);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final RegistryObject<BatteryItem> BATTERY_ITEM = ITEMS.register("battery", BatteryItem::new);
     
     public JustABattery(){
         LOGGER.info("[JustABattery]: Starting. Thanks for using :+1:. Also many thanks to markygnlg, who suggested this mod idea in the first place!");
+        TABS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         
         JustAConfig.load();

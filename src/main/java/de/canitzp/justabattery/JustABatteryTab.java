@@ -1,26 +1,19 @@
 package de.canitzp.justabattery;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.CreativeModeTabEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = JustABattery.MODID)
 public class JustABatteryTab {
 
-    public static final ResourceLocation NAME = new ResourceLocation(JustABattery.MODID, "tab");
     public static final Component TITLE = Component.translatable("tab." + JustABattery.MODID);
-    @SubscribeEvent
-    public static void registerCreativeTab(CreativeModeTabEvent.Register event){
-        event.registerCreativeModeTab(NAME, builder -> {
-            builder.icon(() -> JustABattery.BATTERY_ITEM.get().getDefaultInstance());
-            builder.title(TITLE);
-            builder.displayItems(JustABatteryTab::addItemsToDisplay);
-        });
+
+    public static CreativeModeTab create() {
+        return CreativeModeTab.builder()
+                .icon(() -> JustABattery.BATTERY_ITEM.get().getDefaultInstance())
+                .title(TITLE)
+                .displayItems(JustABatteryTab::addItemsToDisplay)
+                .build();
     }
 
     private static void addItemsToDisplay(CreativeModeTab.ItemDisplayParameters parameters, CreativeModeTab.Output output){
