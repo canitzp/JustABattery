@@ -2,15 +2,15 @@
 
 ### Support:
 
-- 1.20/1.20.1: supported
+- 1.20.1: supported
+- 1.20: Bugfix only
 - 1.19.4: Bugfix only
 - 1.19.3: unsupported
 - 1.19.2: Bugfix only
 - 1.19: unsupported
-- 1.18.2: Bugfix only
-- 1.18/1.18.1: unsupported
-- 1.17.1: unsupported
-- 1.16.5: unsupported
+- 1.18.x: unsupported
+- 1.17.x: unsupported
+- 1.16.x: unsupported
 
 ### About
 Just a Battery is another "Mini-Mod" and adds just a battery to the game.  
