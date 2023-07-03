@@ -87,6 +87,8 @@ jar {
     }
 }
 
+jar.finalizedBy('reobfJar')
+
 idea {
     module {
         inheritOutputDirs = true
