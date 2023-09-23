@@ -1,3 +1,7 @@
+**43.1.0**
+
+- Add config option to charge up battery on craft. Only works when crafting a new battery from raw materials, no combination! (Closes #11)
+
 **43.0.0**
 
 - Update to 1.19.2

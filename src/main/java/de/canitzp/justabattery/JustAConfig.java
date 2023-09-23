@@ -49,6 +49,8 @@ public class JustAConfig {
         public boolean allow_block_discharge = true;
         public String _chargeup_creeper_energy_required = "How much energy is required to convert a creeper to a powered one. Use any negative number to disable this feature.";
         public int chargeup_creeper_energy_required = 100_000;
+        public String _charged_up_battery_on_craft = "If enabled, the crafted battery (only single battery, not combined ones) are charged fully up. Default: false";
+        public boolean charged_up_battery_on_craft = false;
     }
 
 }

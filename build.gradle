@@ -108,7 +108,7 @@ modrinth {
     syncBodyFrom = rootProject.file("README.md").text
 }
 
-tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
+//tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
 
 //noinspection UnnecessaryQualifiedReference
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
