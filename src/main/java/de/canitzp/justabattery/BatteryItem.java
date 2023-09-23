@@ -23,6 +23,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -226,7 +227,16 @@ public class BatteryItem extends Item {
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt){
         return new StackEnergyStorage(stack);
     }
-    
+
+    @Override
+    public void onCraftedBy(@NotNull ItemStack stack, @NotNull Level level, @NotNull Player player) {
+        if(BatteryItem.getLevel(stack) == 1 && BatteryItem.getTraceWidth(stack) == 1){
+            if(JustAConfig.get().charged_up_battery_on_craft){
+                BatteryItem.setStoredEnergy(stack, BatteryItem.getCapacity(stack));
+            }
+        }
+    }
+
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int p_41407_, boolean p_41408_){
         if(level.isClientSide()){
