@@ -1,8 +1,8 @@
 plugins {
-    id "java"
+    id "java-library"
     id "idea"
-    id "net.minecraftforge.gradle" version "[6.0,6.2)"
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'net.neoforged.gradle.userdev' version '7.0.+'
+    //id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id "com.modrinth.minotaur" version "2.+"
     id 'net.darkhax.curseforgegradle' version '1.+'
 }
@@ -17,50 +17,29 @@ base {
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
-    
-minecraft {
-    mappings channel: 'parchment', version: "2023.06.26-1.20.1"
 
-    copyIdeResources = true
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            mods {
-                justabattery {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run_server')
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                justabattery {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'justabattery', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                justabattery {
-                    source sourceSets.main
-                }
-            }
-        }
+runs {
+    configureEach {
+        //systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
+    }
+    client {
+        workingDirectory project.file('run')
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+    server {
+        workingDirectory project.file('run_server')
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
+    gameTestServer {
+        workingDirectory project.file('run_gametest')
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+    data {
+        workingDirectory project.file('run_data')
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 
@@ -68,35 +47,34 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenLocal()
     maven {
         url = "https://maven.blamejared.com/"
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.forge_version}"
+    implementation "net.neoforged:neoforge:${project.forge_version}"
     //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 
 
-// This block of code expands all declared replace properties in the specified resource targets.
-// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
-// When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
-// See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
-def resourceTargets = ['META-INF/mods.toml']
-def replaceProperties = [
-        mod_version: "${project.mod_version}"
-]
-processResources {
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            mod_loader: "javafml",
+            loader_version: "${project.valid_forge_versions}",
+            license: "${project.license}",
+            mod_id: "${project.mod_id}",
+            mod_version: "${project.mod_version}",
+            mc_version_range: "${project.mc_version_range}"
+    ]
     inputs.properties replaceProperties
-    replaceProperties.put 'project', project
-
-    filesMatching(resourceTargets) {
-        expand replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
 }
 
-jar {
+/*jar {
     manifest {
         attributes([
                 "Specification-Title": project.mod_name,
@@ -108,9 +86,7 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-}
-
-jar.finalizedBy('reobfJar')
+}*/
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation

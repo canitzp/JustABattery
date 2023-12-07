@@ -9,7 +9,7 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 public class BatteryCombiningRecipe extends ShapelessRecipe {
     
@@ -19,7 +19,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     public static final BatteryCombiningRecipe INSTANCE = new BatteryCombiningRecipe();
     
     private BatteryCombiningRecipe(){
-        super(ID, "", CraftingBookCategory.EQUIPMENT, JustABattery.BATTERY_ITEM.get().getDefaultInstance(), INPUTS);
+        super("", CraftingBookCategory.EQUIPMENT, JustABattery.BATTERY_ITEM.get().getDefaultInstance(), INPUTS);
     }
     
     @Override

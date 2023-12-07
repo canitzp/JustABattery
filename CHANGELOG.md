@@ -1,3 +1,6 @@
+202.0.0:
+- Update to Minecraft 1.20.2 and migration to NeoForge
+
 47.1.0:
 43.1.0:
 - Add config option to charge up battery on craft. Only works when crafting a new battery from raw materials, no combination! (Closes #11)

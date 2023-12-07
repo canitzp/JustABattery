@@ -18,11 +18,11 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.common.capabilities.Capabilities;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.common.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -162,7 +162,7 @@ public class BatteryItem extends Item {
         if (blockEntity == null) {
             return super.useOn(context);
         }
-        LazyOptional<IEnergyStorage> cap = blockEntity.getCapability(ForgeCapabilities.ENERGY, context.getClickedFace());
+        LazyOptional<IEnergyStorage> cap = blockEntity.getCapability(Capabilities.ENERGY, context.getClickedFace());
         if (!cap.isPresent()) {
             return super.useOn(context);
         }
@@ -251,7 +251,7 @@ public class BatteryItem extends Item {
             List<ItemStack> energyItems = player.getInventory().items
                 .stream()
                 .filter(itemStack -> !ItemStack.isSameItemSameTags(itemStack, stack))
-                .filter(itemStack -> itemStack.getCapability(ForgeCapabilities.ENERGY).isPresent())
+                .filter(itemStack -> itemStack.getCapability(Capabilities.ENERGY).isPresent())
                 .collect(Collectors.toList());
             int storedEnergy = getStoredEnergy(stack);
             int maxTransferableEnergy = Math.min(storedEnergy, getMaxTransfer(stack));
@@ -277,7 +277,7 @@ public class BatteryItem extends Item {
         int index = 0;
         while(energyTransferred.get() == 0 && index < storages.size()){
             ItemStack energyReceiverStack = storages.get(index++);
-            energyReceiverStack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyReceiverStorage -> {
+            energyReceiverStack.getCapability(Capabilities.ENERGY).ifPresent(energyReceiverStorage -> {
                 energyTransferred.set(energyReceiverStorage.receiveEnergy(energy, false));
             });
         }
@@ -290,11 +290,11 @@ public class BatteryItem extends Item {
             return 0;
         }
         AtomicInteger energyTransferred = new AtomicInteger(0);
-        List<ItemStack> stacksThatReallyWantSomeEnergy = storages.stream().filter(stack -> stack.getCapability(ForgeCapabilities.ENERGY).resolve().get().receiveEnergy(1, true) > 0).collect(Collectors.toList());
+        List<ItemStack> stacksThatReallyWantSomeEnergy = storages.stream().filter(stack -> stack.getCapability(Capabilities.ENERGY).resolve().get().receiveEnergy(1, true) > 0).collect(Collectors.toList());
         if(stacksThatReallyWantSomeEnergy.size() > 0){
             int energyPerStack = (int) (energy / (stacksThatReallyWantSomeEnergy.size() * 1.0F));
             stacksThatReallyWantSomeEnergy.forEach(itemStack -> {
-                itemStack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyReceiverStorage -> {
+                itemStack.getCapability(Capabilities.ENERGY).ifPresent(energyReceiverStorage -> {
                     energyTransferred.addAndGet(energyReceiverStorage.receiveEnergy(energyPerStack, false));
                 });
             });
@@ -309,7 +309,7 @@ public class BatteryItem extends Item {
         }
         AtomicInteger energyTransferred = new AtomicInteger(0);
         int index = new Random().nextInt(storages.size());
-        storages.get(index).getCapability(ForgeCapabilities.ENERGY).ifPresent(energyReceiverStorage -> {
+        storages.get(index).getCapability(Capabilities.ENERGY).ifPresent(energyReceiverStorage -> {
             energyTransferred.set(energyReceiverStorage.receiveEnergy(energy, false));
         });
         return energyTransferred.get();
@@ -331,7 +331,7 @@ public class BatteryItem extends Item {
                     BlockEntity tile = player.level().getBlockEntity(position);
                     if(tile != null){
                         for (Direction side : Direction.values()) {
-                            tile.getCapability(ForgeCapabilities.ENERGY, side).ifPresent(iEnergyStorage -> {
+                            tile.getCapability(Capabilities.ENERGY, side).ifPresent(iEnergyStorage -> {
                                 energyAvailable.set(energyAvailable.get() - iEnergyStorage.receiveEnergy(energyAvailable.get(), false));
                             });
                             if(energyAvailable.get() <= 0){
@@ -418,7 +418,7 @@ public class BatteryItem extends Item {
         @Nonnull
         @Override
         public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side){
-            return ForgeCapabilities.ENERGY.orEmpty(cap, holder);
+            return Capabilities.ENERGY.orEmpty(cap, holder);
         }
     }
 }

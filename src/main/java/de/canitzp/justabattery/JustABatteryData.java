@@ -1,25 +1,23 @@
 package de.canitzp.justabattery;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.*;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +36,7 @@ public class JustABatteryData {
 
         // Server
         generator.addProvider(event.includeServer(), new ItemTagProvider(generator.getPackOutput(), event.getLookupProvider(), helper));
-        generator.addProvider(event.includeServer(), new Recipe(generator.getPackOutput()));
+        generator.addProvider(event.includeServer(), new Recipe(generator.getPackOutput(), event.getLookupProvider()));
     }
 
     public static class ItemModel extends ItemModelProvider {
@@ -49,7 +47,7 @@ public class JustABatteryData {
 
         @Override
         protected void registerModels() {
-            ItemModelBuilder batteryModelBuilder = singleTexture("battery", mcLoc("item/handheld"), "layer0", modLoc("item/single/battery_single_empty"));
+            ItemModelBuilder batteryModelBuilder = this.singleTexture("battery", this.mcLoc("item/handheld"), "layer0", this.modLoc("item/single/battery_single_empty"));
 
             String[] quantificationNames = new String[]{"single", "double", "triple", "quad", "quint"};
             String[] levelNames = new String[]{"empty", "10", "20", "30", "40", "50", "60", "70", "80", "90", "full"};
@@ -57,7 +55,7 @@ public class JustABatteryData {
                 for(int level = 0; level <= 10; level++){
                     String quantificationName = quantificationNames[size - 1];
                     String levelName = levelNames[level];
-                    ItemModelBuilder batteryStageModel = singleTexture("item/" + quantificationName + "/battery_" + quantificationName + "_" + levelName, mcLoc("item/handheld"), "layer0", modLoc("item/" + quantificationName + "/battery_" + quantificationName + "_" + levelName));
+                    ItemModelBuilder batteryStageModel = this.singleTexture("item/" + quantificationName + "/battery_" + quantificationName + "_" + levelName, this.mcLoc("item/handheld"), "layer0", this.modLoc("item/" + quantificationName + "/battery_" + quantificationName + "_" + levelName));
 
                     batteryModelBuilder.override()
                             .predicate(new ResourceLocation("justabattery:size"), size)
@@ -70,12 +68,12 @@ public class JustABatteryData {
 
     public static class Recipe extends RecipeProvider {
 
-        public Recipe(PackOutput output) {
-            super(output);
+        public Recipe(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+            super(output, lookupProvider);
         }
 
         @Override
-        protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+        protected void buildRecipes(@NotNull RecipeOutput output) {
             ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, JustABattery.BATTERY_ITEM.get())
                     .define('r', Tags.Items.STORAGE_BLOCKS_REDSTONE)
                     .define('l', Tags.Items.GEMS_LAPIS)
@@ -85,7 +83,7 @@ public class JustABatteryData {
                     .pattern("lrl")
                     .pattern("ccc")
                     .unlockedBy("has_lapis_gem", has(Tags.Items.GEMS_LAPIS))
-                    .save(consumer);
+                    .save(output);
         }
     }
 
@@ -98,7 +96,7 @@ public class JustABatteryData {
 
         @Override
         protected void addTags(HolderLookup.Provider lookupProvider) {
-            this.tag(ItemTags.create(new ResourceLocation("curios:curio"))).add(ForgeRegistries.ITEMS.getResourceKey(JustABattery.BATTERY_ITEM.get()).get());
+            this.tag(ItemTags.create(new ResourceLocation("curios:curio"))).add(BuiltInRegistries.ITEM.getResourceKey(JustABattery.BATTERY_ITEM.get()).get());
         }
     }
 
