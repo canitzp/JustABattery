@@ -1,3 +1,6 @@
+204.0.0:
+- Update to 1.20.4 
+
 202.0.0:
 - Update to Minecraft 1.20.2 and migration to NeoForge
 

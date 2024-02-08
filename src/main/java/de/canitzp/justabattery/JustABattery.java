@@ -22,6 +22,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -46,6 +48,9 @@ public class JustABattery {
     
     public JustABattery(){
         LOGGER.info("[JustABattery]: Starting. Thanks for using :+1:. Also many thanks to markygnlg, who suggested this mod idea in the first place!");
+
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerCapabilities);
+
         TABS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         
@@ -101,5 +106,9 @@ public class JustABattery {
                 event.setCanceled(true); // we don't want the item entity to be destroyed by the lightning bolt
             }
         }
+    }
+
+    private void registerCapabilities(RegisterCapabilitiesEvent event){
+        event.registerItem(Capabilities.EnergyStorage.ITEM, (stack, unused) -> new BatteryItem.StackEnergyStorage(stack), BATTERY_ITEM.get());
     }
 }

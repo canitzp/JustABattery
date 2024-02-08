@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -18,10 +19,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
 
@@ -162,21 +162,19 @@ public class BatteryItem extends Item {
         if (blockEntity == null) {
             return super.useOn(context);
         }
-        LazyOptional<IEnergyStorage> cap = blockEntity.getCapability(Capabilities.ENERGY, context.getClickedFace());
-        if (!cap.isPresent()) {
+        IEnergyStorage cap = context.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK, context.getClickedPos(), context.getClickedFace());
+        if (cap == null) {
             return super.useOn(context);
         }
-        cap.ifPresent(iEnergyStorage -> {
-            ItemStack battery = context.getItemInHand();
-            int maxReceivableEnergy = Math.min(BatteryItem.getMaxTransfer(battery), BatteryItem.getCapacity(battery) - BatteryItem.getStoredEnergy(battery));
-            if(maxReceivableEnergy > 0){
-                int extractedEnergy = iEnergyStorage.extractEnergy(maxReceivableEnergy, false);
-                if(extractedEnergy > 0){
-                    BatteryItem.setStoredEnergy(context.getItemInHand(), BatteryItem.getStoredEnergy(battery) + extractedEnergy);
-                    context.getPlayer().sendSystemMessage(Component.translatable("item.justabattery.desc.energy_received_from_block", extractedEnergy, context.getLevel().getBlockState(context.getClickedPos()).getBlock().getName()));
-                }
+        ItemStack battery = context.getItemInHand();
+        int maxReceivableEnergy = Math.min(BatteryItem.getMaxTransfer(battery), BatteryItem.getCapacity(battery) - BatteryItem.getStoredEnergy(battery));
+        if(maxReceivableEnergy > 0){
+            int extractedEnergy = cap.extractEnergy(maxReceivableEnergy, false);
+            if(extractedEnergy > 0){
+                BatteryItem.setStoredEnergy(context.getItemInHand(), BatteryItem.getStoredEnergy(battery) + extractedEnergy);
+                context.getPlayer().sendSystemMessage(Component.translatable("item.justabattery.desc.energy_received_from_block", extractedEnergy, context.getLevel().getBlockState(context.getClickedPos()).getBlock().getName()));
             }
-        });
+        }
         return InteractionResult.SUCCESS;
     }
 
@@ -222,12 +220,6 @@ public class BatteryItem extends Item {
         return super.onItemUseFirst(stack, context);
     }
 
-    @Nullable
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt){
-        return new StackEnergyStorage(stack);
-    }
-
     @Override
     public void onCraftedBy(@NotNull ItemStack stack, @NotNull Level level, @NotNull Player player) {
         if(BatteryItem.getLevel(stack) == 1 && BatteryItem.getTraceWidth(stack) == 1){
@@ -251,7 +243,7 @@ public class BatteryItem extends Item {
             List<ItemStack> energyItems = player.getInventory().items
                 .stream()
                 .filter(itemStack -> !ItemStack.isSameItemSameTags(itemStack, stack))
-                .filter(itemStack -> itemStack.getCapability(Capabilities.ENERGY).isPresent())
+                .filter(itemStack -> itemStack.getCapability(Capabilities.EnergyStorage.ITEM) != null)
                 .collect(Collectors.toList());
             int storedEnergy = getStoredEnergy(stack);
             int maxTransferableEnergy = Math.min(storedEnergy, getMaxTransfer(stack));
@@ -277,9 +269,10 @@ public class BatteryItem extends Item {
         int index = 0;
         while(energyTransferred.get() == 0 && index < storages.size()){
             ItemStack energyReceiverStack = storages.get(index++);
-            energyReceiverStack.getCapability(Capabilities.ENERGY).ifPresent(energyReceiverStorage -> {
+            IEnergyStorage energyReceiverStorage = energyReceiverStack.getCapability(Capabilities.EnergyStorage.ITEM);
+            if (energyReceiverStorage != null) {
                 energyTransferred.set(energyReceiverStorage.receiveEnergy(energy, false));
-            });
+            }
         }
         return energyTransferred.get();
     }
@@ -290,13 +283,14 @@ public class BatteryItem extends Item {
             return 0;
         }
         AtomicInteger energyTransferred = new AtomicInteger(0);
-        List<ItemStack> stacksThatReallyWantSomeEnergy = storages.stream().filter(stack -> stack.getCapability(Capabilities.ENERGY).resolve().get().receiveEnergy(1, true) > 0).collect(Collectors.toList());
-        if(stacksThatReallyWantSomeEnergy.size() > 0){
+        List<ItemStack> stacksThatReallyWantSomeEnergy = storages.stream().filter(stack -> stack.getCapability(Capabilities.EnergyStorage.ITEM).receiveEnergy(1, true) > 0).toList();
+        if(!stacksThatReallyWantSomeEnergy.isEmpty()){
             int energyPerStack = (int) (energy / (stacksThatReallyWantSomeEnergy.size() * 1.0F));
             stacksThatReallyWantSomeEnergy.forEach(itemStack -> {
-                itemStack.getCapability(Capabilities.ENERGY).ifPresent(energyReceiverStorage -> {
+                IEnergyStorage energyReceiverStorage = itemStack.getCapability(Capabilities.EnergyStorage.ITEM);
+                if(energyReceiverStorage != null){
                     energyTransferred.addAndGet(energyReceiverStorage.receiveEnergy(energyPerStack, false));
-                });
+                }
             });
         }
         return energyTransferred.get();
@@ -309,9 +303,10 @@ public class BatteryItem extends Item {
         }
         AtomicInteger energyTransferred = new AtomicInteger(0);
         int index = new Random().nextInt(storages.size());
-        storages.get(index).getCapability(Capabilities.ENERGY).ifPresent(energyReceiverStorage -> {
+        IEnergyStorage energyReceiverStorage = storages.get(index).getCapability(Capabilities.EnergyStorage.ITEM);
+        if(energyReceiverStorage != null){
             energyTransferred.set(energyReceiverStorage.receiveEnergy(energy, false));
-        });
+        }
         return energyTransferred.get();
     }
 
@@ -331,14 +326,14 @@ public class BatteryItem extends Item {
                     BlockEntity tile = player.level().getBlockEntity(position);
                     if(tile != null){
                         for (Direction side : Direction.values()) {
-                            tile.getCapability(Capabilities.ENERGY, side).ifPresent(iEnergyStorage -> {
-                                energyAvailable.set(energyAvailable.get() - iEnergyStorage.receiveEnergy(energyAvailable.get(), false));
-                            });
+                            IEnergyStorage energyStorage = player.level().getCapability(Capabilities.EnergyStorage.BLOCK, position, side);
+                            if(energyStorage != null){
+                                energyAvailable.set(energyAvailable.get() - energyStorage.receiveEnergy(energyAvailable.get(), false));
+                            }
                             if(energyAvailable.get() <= 0){
                                 return energy;
                             }
                         }
-
                     }
                 }
             }
@@ -354,9 +349,8 @@ public class BatteryItem extends Item {
         BatteryItem.setStoredEnergy(batteryStack, newEnergyLevel);
     }
     
-    public static class StackEnergyStorage implements IEnergyStorage, ICapabilityProvider {
+    public static class StackEnergyStorage implements IEnergyStorage, ICapabilityProvider<ItemStack, Void, IEnergyStorage> {
     
-        private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> this);
         private final ItemStack stack;
         
         public StackEnergyStorage(ItemStack stack){
@@ -414,11 +408,10 @@ public class BatteryItem extends Item {
             }
             return energyExtracted;
         }
-        
-        @Nonnull
+
         @Override
-        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side){
-            return Capabilities.ENERGY.orEmpty(cap, holder);
+        public @Nonnull IEnergyStorage getCapability(ItemStack stack, Void unused) {
+            return this;
         }
     }
 }
