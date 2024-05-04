@@ -57,11 +57,11 @@ public class BatteryItem extends Item {
     }
 
     public static int getStoredEnergy(ItemStack stack){
-        return stack.getOrCreateTag().getInt("Energy");
+        return stack.getOrDefault(JustABattery.DC_ENERGY, 0);
     }
     
     public static void setStoredEnergy(ItemStack stack, int energy){
-        stack.getOrCreateTag().putInt("Energy", energy);
+        stack.set(JustABattery.DC_ENERGY, energy);
     }
     
     public static int getCapacity(ItemStack stack){
@@ -73,29 +73,29 @@ public class BatteryItem extends Item {
     }
     
     public static byte getMode(ItemStack stack){
-        return stack.getOrCreateTag().getByte("Mode");
+        return stack.getOrDefault(JustABattery.DC_MODE, (byte) 0);
     }
     
     public static void setMode(ItemStack stack, byte mode){
-        stack.getOrCreateTag().putByte("Mode", mode);
+        stack.set(JustABattery.DC_MODE, mode);
     }
     
     public static int getLevel(ItemStack stack){
-        int level = stack.getOrCreateTag().getInt("Level");
+        int level = stack.getOrDefault(JustABattery.DC_LEVEL, 0);
         return level <= 0 ? 1 : level;
     }
     
     public static void setLevel(ItemStack stack, int level){
-        stack.getOrCreateTag().putInt("Level", level);
+        stack.set(JustABattery.DC_LEVEL, level);
     }
     
     public static int getTraceWidth(ItemStack stack){
-        int traceWidth = stack.getOrCreateTag().getInt("TraceWidth");
+        int traceWidth = stack.getOrDefault(JustABattery.DC_TRACE_WIDTH, 0);
         return traceWidth <= 0 ? 1 : traceWidth;
     }
     
     public static void setTraceWidth(ItemStack stack, int traceWidth){
-        stack.getOrCreateTag().putInt("TraceWidth", traceWidth);
+        stack.set(JustABattery.DC_TRACE_WIDTH, traceWidth);
     }
     
     public BatteryItem(){
@@ -103,8 +103,8 @@ public class BatteryItem extends Item {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag){
-        super.appendHoverText(stack, level, tooltip, flag);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag){
+        super.appendHoverText(stack, context, tooltip, flag);
     
         tooltip.add(Component.translatable("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
         tooltip.add(Component.translatable("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
@@ -242,7 +242,7 @@ public class BatteryItem extends Item {
 
             List<ItemStack> energyItems = player.getInventory().items
                 .stream()
-                .filter(itemStack -> !ItemStack.isSameItemSameTags(itemStack, stack))
+                .filter(itemStack -> !itemStack.equals(stack)) // skip if the found stack is myself
                 .filter(itemStack -> itemStack.getCapability(Capabilities.EnergyStorage.ITEM) != null)
                 .collect(Collectors.toList());
             int storedEnergy = getStoredEnergy(stack);

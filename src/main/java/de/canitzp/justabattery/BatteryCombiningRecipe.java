@@ -1,5 +1,6 @@
 package de.canitzp.justabattery;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -96,7 +97,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     }
     
     @Override
-    public ItemStack assemble(CraftingContainer inv, RegistryAccess access){
+    public ItemStack assemble(CraftingContainer inv, HolderLookup.Provider access){
         ItemStack output = super.getResultItem(access).copy();
         // levels are combined
         BatteryItem.setLevel(output, this.getCombinedLevel(inv));
