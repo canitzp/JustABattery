@@ -1,3 +1,9 @@
+206.1.0:
+204.1.0:
+202.1.0:
+47.2.0:
+- Add a tiny tooltip guide to the battery item, to easier show how to combine them. Idea by Jadan1213
+
 206.0.0:
 - Update to 1.20.6
 

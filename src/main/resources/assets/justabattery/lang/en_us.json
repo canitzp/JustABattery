@@ -8,6 +8,7 @@
   "item.justabattery.name.prefix.5": "Quintuple",
   "item.justabattery.desc.level": "Level: %d",
   "item.justabattery.desc.tracewidth": "Trace width: %d (Max transfer: %dFE/t)",
+  "item.justabattery.desc.upgrade_guide": "Craft together with other cells to upgrade battery. Combine with %s to increase its trace width.",
   "item.justabattery.prefix.mode": "Mode:",
   "item.justabattery.name.mode.0": "None",
   "item.justabattery.desc.mode.0": "Sneak + Mouse-Right in world to change it.",
