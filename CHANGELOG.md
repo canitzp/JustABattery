@@ -1,3 +1,18 @@
+206.1.0:
+204.1.0:
+202.1.0:
+47.2.0:
+- Add a tiny tooltip guide to the battery item, to easier show how to combine them. Idea by Jadan1213
+
+206.0.0:
+- Update to 1.20.6
+
+204.0.0:
+- Update to 1.20.4 
+
+202.0.0:
+- Update to Minecraft 1.20.2 and migration to NeoForge
+
 47.1.0:
 43.1.0:
 - Add config option to charge up battery on craft. Only works when crafting a new battery from raw materials, no combination! (Closes #11)

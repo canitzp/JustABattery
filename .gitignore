@@ -5,3 +5,5 @@ build/
 classes/
 run/
 run_server/
+run_data/
+src/generated/

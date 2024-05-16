@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "justabattery:item/triple/battery_triple_30"
-  }
-}
