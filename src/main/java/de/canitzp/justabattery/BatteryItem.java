@@ -3,6 +3,8 @@ package de.canitzp.justabattery;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -14,6 +16,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -26,7 +29,6 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,12 +105,15 @@ public class BatteryItem extends Item {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag){
+    public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag){
         super.appendHoverText(stack, level, tooltip, flag);
     
         tooltip.add(Component.translatable("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
         tooltip.add(Component.translatable("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
-    
+
+        String gold_nugget_translated = Language.getInstance().getOrDefault(BuiltInRegistries.ITEM.getKey(Items.GOLD_NUGGET).toLanguageKey("item"), "gold nugget");
+        tooltip.add(Component.translatable("item.justabattery.desc.upgrade_guide", gold_nugget_translated).withStyle(ChatFormatting.GRAY));
+
         byte mode = getMode(stack);
         tooltip.add(Component.translatable("item.justabattery.prefix.mode").append(" ").append(Component.translatable("item.justabattery.name.mode." + mode)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
         tooltip.add(Component.translatable("item.justabattery.desc.mode." + mode).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
@@ -222,9 +227,8 @@ public class BatteryItem extends Item {
         return super.onItemUseFirst(stack, context);
     }
 
-    @Nullable
     @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt){
+    public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt){
         return new StackEnergyStorage(stack);
     }
 
@@ -414,10 +418,10 @@ public class BatteryItem extends Item {
             }
             return energyExtracted;
         }
-        
+
         @Nonnull
         @Override
-        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side){
+        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, Direction side){
             return Capabilities.ENERGY.orEmpty(cap, holder);
         }
     }
