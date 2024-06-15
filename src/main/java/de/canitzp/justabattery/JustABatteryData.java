@@ -59,8 +59,8 @@ public class JustABatteryData {
                     ItemModelBuilder batteryStageModel = this.singleTexture("item/" + quantificationName + "/battery_" + quantificationName + "_" + levelName, this.mcLoc("item/handheld"), "layer0", this.modLoc("item/" + quantificationName + "/battery_" + quantificationName + "_" + levelName));
 
                     batteryModelBuilder.override()
-                            .predicate(new ResourceLocation("justabattery:size"), size)
-                            .predicate(new ResourceLocation("justabattery:level"), level / 10F)
+                            .predicate(ResourceLocation.parse("justabattery:size"), size)
+                            .predicate(ResourceLocation.parse("justabattery:level"), level / 10F)
                             .model(batteryStageModel);
                 }
             }
@@ -97,7 +97,7 @@ public class JustABatteryData {
 
         @Override
         protected void addTags(HolderLookup.Provider lookupProvider) {
-            this.tag(ItemTags.create(new ResourceLocation("curios:curio"))).add(BuiltInRegistries.ITEM.getResourceKey(JustABattery.BATTERY_ITEM.get()).get());
+            this.tag(ItemTags.create(ResourceLocation.parse("curios:curio"))).add(BuiltInRegistries.ITEM.getResourceKey(JustABattery.BATTERY_ITEM.get()).get());
         }
     }
 

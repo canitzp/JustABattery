@@ -82,10 +82,10 @@ public class JustABattery {
 
     @OnlyIn(Dist.CLIENT)
     private void loadClient(FMLClientSetupEvent event){
-        ItemProperties.register(BATTERY_ITEM.get(), new ResourceLocation(MODID, "level"), (stack, level, entity, i) -> {
+        ItemProperties.register(BATTERY_ITEM.get(), ResourceLocation.fromNamespaceAndPath(MODID, "level"), (stack, level, entity, i) -> {
             return BatteryItem.getStoredEnergy(stack) / (BatteryItem.getCapacity(stack) * 1.0F);
         });
-        ItemProperties.register(BATTERY_ITEM.get(), new ResourceLocation(MODID, "size"), (stack, level, entity, i) -> {
+        ItemProperties.register(BATTERY_ITEM.get(), ResourceLocation.fromNamespaceAndPath(MODID, "size"), (stack, level, entity, i) -> {
             int batLevel = BatteryItem.getLevel(stack);
             return batLevel <= 0 ? 1 : Math.min(batLevel, 5);
         });
