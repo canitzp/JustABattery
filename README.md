@@ -2,10 +2,11 @@
 
 ### Support:
 
+- 1.21: normal updates
 - 1.20.6: normal updates
-- 1.20.4: Bugfix only
-- 1.20.2: Bugfix only
-- 1.20.1: Bugfix only
+- 1.20.4: normal updates
+- 1.20.2: unsupported
+- 1.20.1: normal updates
 - 1.20: unsupported
 - 1.19.x: unsupported
 - 1.18.x: unsupported
