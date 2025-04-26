@@ -4,10 +4,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -98,8 +101,8 @@ public class BatteryItem extends Item {
         stack.set(JustABattery.DC_TRACE_WIDTH, traceWidth);
     }
     
-    public BatteryItem(){
-        super(new Properties().stacksTo(1).fireResistant());
+    public BatteryItem(ResourceLocation id){
+        super(new Properties().setId(ResourceKey.create(Registries.ITEM, id)).useItemDescriptionPrefix().stacksTo(1).fireResistant());
     }
     
     @Override
@@ -122,7 +125,7 @@ public class BatteryItem extends Item {
     @Override
     public Component getName(ItemStack stack){
         MutableComponent primary = null;
-        MutableComponent secondary = Component.translatable(this.getDescriptionId(stack));
+        MutableComponent secondary = Component.translatable(this.getDescriptionId());
     
         int level = getLevel(stack);
         if(level >= 2 && level <= 5){
@@ -175,7 +178,7 @@ public class BatteryItem extends Item {
             int extractedEnergy = cap.extractEnergy(maxReceivableEnergy, false);
             if(extractedEnergy > 0){
                 BatteryItem.setStoredEnergy(context.getItemInHand(), BatteryItem.getStoredEnergy(battery) + extractedEnergy);
-                context.getPlayer().sendSystemMessage(Component.translatable("item.justabattery.desc.energy_received_from_block", extractedEnergy, context.getLevel().getBlockState(context.getClickedPos()).getBlock().getName()));
+                context.getPlayer().displayClientMessage(Component.translatable("item.justabattery.desc.energy_received_from_block", extractedEnergy, context.getLevel().getBlockState(context.getClickedPos()).getBlock().getName()), true);
             }
         }
         return InteractionResult.SUCCESS;
@@ -198,7 +201,7 @@ public class BatteryItem extends Item {
                             tag.putBoolean("powered", true);
                             creeper.readAdditionalSaveData(tag);
                             BatteryItem.setStoredEnergy(stack, storedEnergy - chargupEnergy);
-                            attacker.sendSystemMessage(Component.translatable("item.justabattery.desc.charged_creeper"));
+                            ((Player) attacker).displayClientMessage(Component.translatable("item.justabattery.desc.charged_creeper"), true);
                         }
                     }
                 }

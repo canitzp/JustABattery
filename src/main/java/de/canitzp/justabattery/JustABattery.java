@@ -11,7 +11,11 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
@@ -20,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.api.distmarker.Dist;
@@ -33,16 +38,21 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.resource.ContextAwareReloadListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -58,7 +68,7 @@ public class JustABattery {
     public static final Holder<CreativeModeTab> TAB = TABS.register("tab", JustABatteryTab::create);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
     public static final Supplier<BatteryItem> BATTERY_ITEM = ITEMS.register("battery", BatteryItem::new);
-    public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(MODID);
+    public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final Supplier<DataComponentType<Integer>> DC_ENERGY = DATA_COMPONENT_TYPE.registerComponentType("energy", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).cacheEncoding());
     public static final Supplier<DataComponentType<Integer>> DC_LEVEL = DATA_COMPONENT_TYPE.registerComponentType("level", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).cacheEncoding());
     public static final Supplier<DataComponentType<Integer>> DC_TRACE_WIDTH = DATA_COMPONENT_TYPE.registerComponentType("trace_width", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).cacheEncoding());
@@ -91,26 +101,32 @@ public class JustABattery {
         });
         LOGGER.info("[JustABattery]: Client setup done.");
     }
-    
+
     @SubscribeEvent
-    public static void onWorldLoad(LevelEvent.Load event){
-        LevelAccessor levelAccessor = event.getLevel();
-        if(levelAccessor instanceof Level level){
-            if(level.dimension() != Level.OVERWORLD){
-                return;
+    public static void addReloadListenerEvent(AddReloadListenerEvent event) {
+        event.addListener(new PreparableReloadListener() {
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor) {
+                RecipeManager recipeManager = event.getServerResources().getRecipeManager();
+                List<RecipeHolder<?>> allRecipes = new ArrayList<>(recipeManager.getRecipes());
+                if (allRecipes.stream().noneMatch(recipe -> recipe.id().equals(BatteryCombiningRecipe.ID))) {
+                    // only add the recipe, if there isn't anyone
+                    allRecipes.add(new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, BatteryCombiningRecipe.ID), BatteryCombiningRecipe.INSTANCE));
+                    Arrays.stream(RecipeManager.class.getDeclaredFields()).filter(field -> field.getType().equals(RecipeMap.class)).findFirst().ifPresent(field -> {
+                        field.setAccessible(true);
+                        try {
+                            field.set(recipeManager, RecipeMap.create(allRecipes));
+                            LOGGER.info("[JustABattery]: Battery recipe injected.");
+                        } catch (IllegalAccessException e) {
+                            LOGGER.error("[JustABattery]: Battery recipe injection failed.", e);
+                        }
+                    });
+                } else {
+                    LOGGER.info("[JustABattery]: Battery recipe aborted! The recipe id does already exist.");
+                }
+                return CompletableFuture.completedFuture(null);
             }
-    
-            RecipeManager recipeManager = level.getRecipeManager();
-            List<RecipeHolder<?>> allRecipes = new ArrayList<>(recipeManager.getRecipes());
-            if(allRecipes.stream().noneMatch(recipe -> recipe.id().equals(BatteryCombiningRecipe.ID))){
-                // only add the recipe, if there isn't anyone
-                allRecipes.add(new RecipeHolder<>(BatteryCombiningRecipe.ID, BatteryCombiningRecipe.INSTANCE));
-                recipeManager.replaceRecipes(allRecipes);
-                LOGGER.info("[JustABattery]: Battery recipe injected.");
-            } else {
-                LOGGER.info("[JustABattery]: Battery recipe aborted! The recipe id does already exist.");
-            }
-        }
+        });
     }
 
     @SubscribeEvent

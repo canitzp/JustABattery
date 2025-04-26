@@ -12,7 +12,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.Tags;
@@ -22,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = JustABattery.MODID)
 public class JustABatteryData {
@@ -37,7 +35,7 @@ public class JustABatteryData {
 
         // Server
         generator.addProvider(event.includeServer(), new ItemTagProvider(generator.getPackOutput(), event.getLookupProvider(), helper));
-        generator.addProvider(event.includeServer(), new Recipe(generator.getPackOutput(), event.getLookupProvider()));
+        event.createProvider(event.includeServer(), Recipe.Runner::new);
     }
 
     public static class ItemModel extends ItemModelProvider {
@@ -69,13 +67,13 @@ public class JustABatteryData {
 
     public static class Recipe extends RecipeProvider {
 
-        public Recipe(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        public Recipe(HolderLookup.Provider output, RecipeOutput lookupProvider) {
             super(output, lookupProvider);
         }
 
         @Override
-        protected void buildRecipes(@NotNull RecipeOutput output) {
-            ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, JustABattery.BATTERY_ITEM.get())
+        protected void buildRecipes() {
+            this.shaped(RecipeCategory.TOOLS, JustABattery.BATTERY_ITEM.get())
                     .define('r', Tags.Items.STORAGE_BLOCKS_REDSTONE)
                     .define('l', Tags.Items.GEMS_LAPIS)
                     .define('g', Tags.Items.NUGGETS_GOLD)
@@ -84,7 +82,23 @@ public class JustABatteryData {
                     .pattern("lrl")
                     .pattern("ccc")
                     .unlockedBy("has_lapis_gem", has(Tags.Items.GEMS_LAPIS))
-                    .save(output);
+                    .save(super.output);
+        }
+
+        public static final class Runner extends RecipeProvider.Runner {
+            public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+                super(output, lookupProvider);
+            }
+
+            @Override
+            protected RecipeProvider createRecipeProvider(HolderLookup.Provider lookupProvider, RecipeOutput output) {
+                return new Recipe(lookupProvider, output);
+            }
+
+            @Override
+            public String getName() {
+                return "JustABattery recipes";
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package de.canitzp.justabattery;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -13,15 +14,19 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.Tags;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class BatteryCombiningRecipe extends ShapelessRecipe {
     
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(JustABattery.MODID, "combine_batteries");
-    public static final NonNullList<Ingredient> INPUTS = NonNullList.of(Ingredient.EMPTY, Ingredient.of(JustABattery.BATTERY_ITEM.get()), Ingredient.of(JustABattery.BATTERY_ITEM.get()), Ingredient.of(Tags.Items.NUGGETS_GOLD));
+    //public static final List<Ingredient> INPUTS = Arrays.asList(Ingredient.of(JustABattery.BATTERY_ITEM.get()), Ingredient.of(JustABattery.BATTERY_ITEM.get()), Ingredient.of(BuiltInRegistries.ITEM.getOrThrow(Tags.Items.NUGGETS_GOLD)));
     
     public static final BatteryCombiningRecipe INSTANCE = new BatteryCombiningRecipe();
     
     private BatteryCombiningRecipe(){
-        super("", CraftingBookCategory.EQUIPMENT, JustABattery.BATTERY_ITEM.get().getDefaultInstance(), INPUTS);
+        super("", CraftingBookCategory.EQUIPMENT, JustABattery.BATTERY_ITEM.get().getDefaultInstance(), new ArrayList<>());
     }
     
     @Override
@@ -42,7 +47,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     private boolean checkIfOnlyValidItemsArePresent(CraftingInput inv){
         for(int i = 0; i < inv.size(); i++){
             ItemStack stack = inv.getItem(i);
-            if(!stack.isEmpty() && this.getIngredients().stream().noneMatch(ingredient -> ingredient.test(stack))){
+            if(!stack.isEmpty() && super.placementInfo().ingredients().stream().noneMatch(ingredient -> ingredient.test(stack))){
                 return false;
             }
         }
@@ -99,7 +104,7 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     
     @Override
     public ItemStack assemble(CraftingInput inv, HolderLookup.Provider access){
-        ItemStack output = super.getResultItem(access).copy();
+        ItemStack output = super.assemble(inv, access);
         // levels are combined
         BatteryItem.setLevel(output, this.getCombinedLevel(inv));
         // the greatest of the both trace widths is chosen
