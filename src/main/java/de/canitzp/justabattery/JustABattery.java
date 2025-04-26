@@ -58,7 +58,7 @@ public class JustABattery {
     public static final Holder<CreativeModeTab> TAB = TABS.register("tab", JustABatteryTab::create);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
     public static final Supplier<BatteryItem> BATTERY_ITEM = ITEMS.register("battery", BatteryItem::new);
-    public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(MODID);
+    public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final Supplier<DataComponentType<Integer>> DC_ENERGY = DATA_COMPONENT_TYPE.registerComponentType("energy", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).cacheEncoding());
     public static final Supplier<DataComponentType<Integer>> DC_LEVEL = DATA_COMPONENT_TYPE.registerComponentType("level", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).cacheEncoding());
     public static final Supplier<DataComponentType<Integer>> DC_TRACE_WIDTH = DATA_COMPONENT_TYPE.registerComponentType("trace_width", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).cacheEncoding());

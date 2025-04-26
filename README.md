@@ -2,7 +2,9 @@
 
 ### Support:
 
-- 1.21: normal updates
+- 1.21.3: upcoming
+- 1.21.1: normal updates
+- 1.21: unsupported
 - 1.20.6: normal updates
 - 1.20.4: normal updates
 - 1.20.2: unsupported
