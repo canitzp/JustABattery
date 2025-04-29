@@ -1,11 +1,10 @@
 package de.canitzp.justabattery;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -47,8 +46,10 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
     private boolean checkIfOnlyValidItemsArePresent(CraftingInput inv){
         for(int i = 0; i < inv.size(); i++){
             ItemStack stack = inv.getItem(i);
-            if(!stack.isEmpty() && super.placementInfo().ingredients().stream().noneMatch(ingredient -> ingredient.test(stack))){
-                return false;
+            if(!stack.isEmpty()){
+                if(!stack.is(JustABattery.BATTERY_ITEM.get()) && !stack.is(Tags.Items.NUGGETS_GOLD) && !stack.is(Tags.Items.INGOTS_GOLD) && !stack.is(Tags.Items.STORAGE_BLOCKS_GOLD)){
+                    return false;
+                }
             }
         }
         return true;
@@ -97,6 +98,10 @@ public class BatteryCombiningRecipe extends ShapelessRecipe {
             ItemStack stack = inv.getItem(i);
             if(stack.is(Tags.Items.NUGGETS_GOLD)){
                 nuggets++;
+            } else if(stack.is(Tags.Items.INGOTS_GOLD)){
+                nuggets += 9;
+            } else if(stack.is(Tags.Items.STORAGE_BLOCKS_GOLD)){
+                nuggets += 81;
             }
         }
         return nuggets;

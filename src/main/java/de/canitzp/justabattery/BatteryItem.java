@@ -1,6 +1,13 @@
 package de.canitzp.justabattery;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.item.properties.numeric.NeedleDirectionHelper;
+import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperty;
+import net.minecraft.client.renderer.item.properties.numeric.Time;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +35,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -418,6 +426,35 @@ public class BatteryItem extends Item {
         @Override
         public @Nonnull IEnergyStorage getCapability(ItemStack stack, Void unused) {
             return this;
+        }
+    }
+
+    public static class ChargeProperty implements RangeSelectItemModelProperty {
+
+        public static final MapCodec<ChargeProperty> MAP_CODEC = RecordCodecBuilder.mapCodec(
+        apply -> apply.group(
+                    Codec.INT.fieldOf("size").forGetter(chargeProperty -> chargeProperty.size),
+                    Codec.INT.fieldOf("level").forGetter(chargeProperty -> chargeProperty.level)
+                )
+                .apply(apply, ChargeProperty::new)
+        );
+        private final int size, level;
+
+        public ChargeProperty(int size, int level) {
+            this.size = size;
+            this.level = level;
+        }
+
+        @Override
+        public float get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+            float batteryCharge = BatteryItem.getStoredEnergy(stack) / (BatteryItem.getCapacity(stack) * 1.0F);
+            int batterySize = Math.max(1, Math.min(BatteryItem.getLevel(stack), 5));
+            return batterySize * 11 + (batteryCharge * 10) - 11;
+        }
+
+        @Override
+        public MapCodec<ChargeProperty> type() {
+            return MAP_CODEC;
         }
     }
 }

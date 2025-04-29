@@ -1,7 +1,7 @@
 package de.canitzp.justabattery;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperties;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentType;
@@ -16,19 +16,20 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeMap;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -38,23 +39,21 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.resource.ContextAwareReloadListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @EventBusSubscriber
 @Mod(JustABattery.MODID)
@@ -84,47 +83,41 @@ public class JustABattery {
         TABS.register(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
+    }
 
-        if(FMLEnvironment.dist.isClient()){
-            modEventBus.addListener(this::loadClient);
+    @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+    public static class ModEvents{
+        @SubscribeEvent
+        public static void registerRegisterRangeSelectItemModelProperties(RegisterRangeSelectItemModelPropertyEvent event){
+            event.register(ResourceLocation.fromNamespaceAndPath(MODID, "battery_charge"), BatteryItem.ChargeProperty.MAP_CODEC);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    private void loadClient(FMLClientSetupEvent event){
-        ItemProperties.register(BATTERY_ITEM.get(), ResourceLocation.fromNamespaceAndPath(MODID, "level"), (stack, level, entity, i) -> {
-            return BatteryItem.getStoredEnergy(stack) / (BatteryItem.getCapacity(stack) * 1.0F);
-        });
-        ItemProperties.register(BATTERY_ITEM.get(), ResourceLocation.fromNamespaceAndPath(MODID, "size"), (stack, level, entity, i) -> {
-            int batLevel = BatteryItem.getLevel(stack);
-            return batLevel <= 0 ? 1 : Math.min(batLevel, 5);
-        });
-        LOGGER.info("[JustABattery]: Client setup done.");
-    }
-
-    @SubscribeEvent
-    public static void addReloadListenerEvent(AddReloadListenerEvent event) {
-        event.addListener(new PreparableReloadListener() {
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void addReloadListenerEvent(AddServerReloadListenersEvent event) {
+        event.addListener(ResourceLocation.fromNamespaceAndPath(MODID, "combination_recipe"), new SimplePreparableReloadListener<RecipeManager>() {
             @Override
-            public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor) {
-                RecipeManager recipeManager = event.getServerResources().getRecipeManager();
-                List<RecipeHolder<?>> allRecipes = new ArrayList<>(recipeManager.getRecipes());
+            protected RecipeManager prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+                return event.getServerResources().getRecipeManager();
+            }
+
+            @Override
+            protected void apply(RecipeManager recipeManager, ResourceManager resourceManager, ProfilerFiller profiler) {
+                 List<RecipeHolder<?>> allRecipes = new ArrayList<>(recipeManager.getRecipes());
                 if (allRecipes.stream().noneMatch(recipe -> recipe.id().equals(BatteryCombiningRecipe.ID))) {
-                    // only add the recipe, if there isn't anyone
                     allRecipes.add(new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, BatteryCombiningRecipe.ID), BatteryCombiningRecipe.INSTANCE));
-                    Arrays.stream(RecipeManager.class.getDeclaredFields()).filter(field -> field.getType().equals(RecipeMap.class)).findFirst().ifPresent(field -> {
-                        field.setAccessible(true);
-                        try {
-                            field.set(recipeManager, RecipeMap.create(allRecipes));
-                            LOGGER.info("[JustABattery]: Battery recipe injected.");
-                        } catch (IllegalAccessException e) {
-                            LOGGER.error("[JustABattery]: Battery recipe injection failed.", e);
-                        }
-                    });
                 } else {
                     LOGGER.info("[JustABattery]: Battery recipe aborted! The recipe id does already exist.");
                 }
-                return CompletableFuture.completedFuture(null);
+                Arrays.stream(RecipeManager.class.getDeclaredFields()).filter(field -> field.getType().equals(RecipeMap.class)).findFirst().ifPresent(field -> {
+                    field.setAccessible(true);
+                    try {
+                        field.set(recipeManager, RecipeMap.create(allRecipes));
+                        LOGGER.info("[JustABattery]: Battery recipe injected.");
+                    } catch (IllegalAccessException e) {
+                        LOGGER.error("[JustABattery]: Battery recipe injection failed.", e);
+                    }
+                });
             }
         });
     }
