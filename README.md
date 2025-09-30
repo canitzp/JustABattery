@@ -2,22 +2,23 @@
 
 ### Support:
 
-|   Version    | Modloader | Support-Status |
-|:------------:|:---------:|:--------------:|
-|    1.21.4    | NeoForge  |       ✅        |
-|    1.21.1    | NeoForge  |       ✅        |
-|     1.21     | NeoForge  |       ❌        |
-|    1.20.6    | NeoForge  |       ✅        |
-|    1.20.4    | NeoForge  |       ❌        |
-|    1.20.2    | NeoForge  |       ❌        |
-|    1.20.1    |   Forge   |       ❌        |
-|     1.20     |   Forge   |       ❌        |
-|    1.19.x    |   Forge   |       ❌        |
-|    1.18.x    |   Forge   |       ❌        |
-|    1.17.x    |   Forge   |       ❌        |
-|    1.16.x    |   Forge   |       ❌        |
+| Version | Modloader | Support-Status |
+|:-------:|:---------:|:--------------:|
+| 1.21.8  | NeoForge  |       ✅        |
+| 1.21.4  | NeoForge  |       ⚠️       |
+| 1.21.1  | NeoForge  |       ⚠️       |
+|  1.21   | NeoForge  |       ❌        |
+| 1.20.6  | NeoForge  |       ❌        |
+| 1.20.4  | NeoForge  |       ❌        |
+| 1.20.2  | NeoForge  |       ❌        |
+| 1.20.1  |   Forge   |       ❌        |
+|  1.20   |   Forge   |       ❌        |
+| 1.19.x  |   Forge   |       ❌        |
+| 1.18.x  |   Forge   |       ❌        |
+| 1.17.x  |   Forge   |       ❌        |
+| 1.16.x  |   Forge   |       ❌        |
 
-Since 1.20.2, NeoForge is the supported modloader.
+⚠️: bug fix only
 
 ### About
 Just a Battery is another "Mini-Mod" and adds just a battery to the game.  

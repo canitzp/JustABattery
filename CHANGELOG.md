@@ -1,7 +1,10 @@
-211.1.0 (29.04.2025):
+218.0.0 (2025-09-30):
+- Update to 1.21.8
+
+211.1.0 (2025-04-29):
 - Gold Ingots and Gold Blocks can be used to increase trace width (Ingots + 9 and Block + 81). Keep in mind that the default max trace width is 100!
 
-214.0.0 (29.04.2025):
+214.0.0 (2025-04-29):
 - Update to 1.21.4
 - Gold Ingots and Gold Blocks can be used to increase trace width (Ingots + 9 and Block + 81). Keep in mind that the default max trace width is 100!
 

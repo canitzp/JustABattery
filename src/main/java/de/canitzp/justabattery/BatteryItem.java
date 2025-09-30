@@ -18,8 +18,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
@@ -28,6 +30,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -38,9 +41,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class BatteryItem extends Item {
@@ -114,20 +119,18 @@ public class BatteryItem extends Item {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag){
-        super.appendHoverText(stack, context, tooltip, flag);
-    
-        tooltip.add(Component.translatable("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
-        tooltip.add(Component.translatable("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flag){
+        tooltip.accept(Component.translatable("item.justabattery.desc.level", getLevel(stack)).withStyle(ChatFormatting.DARK_PURPLE));
+        tooltip.accept(Component.translatable("item.justabattery.desc.tracewidth", getTraceWidth(stack), getMaxTransfer(stack)).withStyle(ChatFormatting.DARK_PURPLE));
 
         String gold_nugget_translated = Language.getInstance().getOrDefault(BuiltInRegistries.ITEM.getKey(Items.GOLD_NUGGET).toLanguageKey("item"), "gold nugget");
-        tooltip.add(Component.translatable("item.justabattery.desc.upgrade_guide", gold_nugget_translated).withStyle(ChatFormatting.GRAY));
+        tooltip.accept(Component.translatable("item.justabattery.desc.upgrade_guide", gold_nugget_translated).withStyle(ChatFormatting.GRAY));
 
         byte mode = getMode(stack);
-        tooltip.add(Component.translatable("item.justabattery.prefix.mode").append(" ").append(Component.translatable("item.justabattery.name.mode." + mode)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-        tooltip.add(Component.translatable("item.justabattery.desc.mode." + mode).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.accept(Component.translatable("item.justabattery.prefix.mode").append(" ").append(Component.translatable("item.justabattery.name.mode." + mode)).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.accept(Component.translatable("item.justabattery.desc.mode." + mode).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
         
-        tooltip.add(Component.translatable("item.justabattery.desc.energy", getStoredEnergy(stack),getCapacity(stack)).withStyle(ChatFormatting.RED));
+        tooltip.accept(Component.translatable("item.justabattery.desc.energy", getStoredEnergy(stack),getCapacity(stack)).withStyle(ChatFormatting.RED));
     }
     
     @Override
@@ -193,9 +196,9 @@ public class BatteryItem extends Item {
     }
 
     @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity victim, LivingEntity attacker) {
+    public void hurtEnemy(ItemStack stack, LivingEntity victim, LivingEntity attacker) {
         if(victim.level().isClientSide){
-            return super.hurtEnemy(stack, victim, attacker);
+            return;
         }
         int chargupEnergy = JustAConfig.get().chargeup_creeper_energy_required;
         if(chargupEnergy >= 0){
@@ -204,10 +207,7 @@ public class BatteryItem extends Item {
                     if(!creeper.isPowered()){
                         int storedEnergy = BatteryItem.getStoredEnergy(stack);
                         if(storedEnergy >= chargupEnergy){
-                            CompoundTag tag = new CompoundTag();
-                            creeper.addAdditionalSaveData(tag);
-                            tag.putBoolean("powered", true);
-                            creeper.readAdditionalSaveData(tag);
+                            creeper.ignite();
                             BatteryItem.setStoredEnergy(stack, storedEnergy - chargupEnergy);
                             ((Player) attacker).displayClientMessage(Component.translatable("item.justabattery.desc.charged_creeper"), true);
                         }
@@ -215,7 +215,6 @@ public class BatteryItem extends Item {
                 }
             }
         }
-        return super.hurtEnemy(stack, victim, attacker);
     }
 
     @Override
@@ -235,7 +234,7 @@ public class BatteryItem extends Item {
     }
 
     @Override
-    public void onCraftedBy(@NotNull ItemStack stack, @NotNull Level level, @NotNull Player player) {
+    public void onCraftedBy(@NotNull ItemStack stack, @NotNull Player player) {
         if(BatteryItem.getLevel(stack) == 1 && BatteryItem.getTraceWidth(stack) == 1){
             if(JustAConfig.get().charged_up_battery_on_craft){
                 BatteryItem.setStoredEnergy(stack, BatteryItem.getCapacity(stack));
@@ -244,7 +243,7 @@ public class BatteryItem extends Item {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int p_41407_, boolean p_41408_){
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @javax.annotation.Nullable EquipmentSlot slot){
         if(level.isClientSide()){
             return;
         }
@@ -254,11 +253,16 @@ public class BatteryItem extends Item {
                 return;
             }
 
-            List<ItemStack> energyItems = player.getInventory().items
-                .stream()
-                .filter(itemStack -> !itemStack.equals(stack)) // skip if the found stack is myself
-                .filter(itemStack -> itemStack.getCapability(Capabilities.EnergyStorage.ITEM) != null)
-                .collect(Collectors.toList());
+            List<ItemStack> energyItems = new ArrayList<>();
+            player.getInventory().forEach(stack1 -> {
+                if(stack1.equals(stack)){
+                    return;
+                }
+                if(stack1.getCapability(Capabilities.EnergyStorage.ITEM) != null){
+                    energyItems.add(stack1);
+                }
+            });
+
             int storedEnergy = getStoredEnergy(stack);
             int maxTransferableEnergy = Math.min(storedEnergy, getMaxTransfer(stack));
             int actualTransferredEnergy = 0;

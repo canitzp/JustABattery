@@ -85,7 +85,7 @@ public class JustABattery {
         modEventBus.addListener(this::registerCapabilities);
     }
 
-    @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber()
     public static class ModEvents{
         @SubscribeEvent
         public static void registerRegisterRangeSelectItemModelProperties(RegisterRangeSelectItemModelPropertyEvent event){
@@ -125,8 +125,10 @@ public class JustABattery {
     @SubscribeEvent
     public static void onEntityStruckByLightning(EntityStruckByLightningEvent event){
         if(event.getEntity() instanceof Player player){
-            player.getInventory().items.stream().filter(itemStack -> itemStack.is(BATTERY_ITEM.get())).forEach(batteryStack -> {
-                BATTERY_ITEM.get().struckByLightning(event.getLightning(), batteryStack);
+            player.getInventory().forEach(stack -> {
+                if (stack.is(BATTERY_ITEM.get())) {
+                    BATTERY_ITEM.get().struckByLightning(event.getLightning(), stack);
+                }
             });
         } else if(event.getEntity() instanceof ItemEntity entity){
             if (entity.getItem().is(BATTERY_ITEM.get())) {
@@ -142,40 +144,35 @@ public class JustABattery {
 
     @SubscribeEvent
     public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
-        Player player = event.getEntity();
-        NonNullList<ItemStack> armorInventory = player.getInventory().armor;
-        NonNullList<ItemStack> mainInventory = player.getInventory().items;
-        NonNullList<ItemStack> offHandInventory = player.getInventory().offhand;
-
         NonNullList<ItemStack> mergedInventory = NonNullList.create();
-        mergedInventory.addAll(armorInventory);
-        mergedInventory.addAll(mainInventory);
-        mergedInventory.addAll(offHandInventory);
+        for (ItemStack itemStack : event.getEntity().getInventory()) {
+            mergedInventory.add(itemStack);
+        }
 
         for(ItemStack stack : mergedInventory){
             if(stack.has(DataComponents.CUSTOM_DATA)){
                 CompoundTag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
                 // update from pre 1.20.6 versions
-                if(tag.contains("Energy", Tag.TAG_INT)){
-                    int energy = tag.getInt("Energy");
+                if(tag.contains("Energy")){
+                    int energy = tag.getIntOr("Energy", 0);
                     tag.remove("Energy");
                     stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                     stack.set(DC_ENERGY, energy);
                 }
-                if(tag.contains("Mode", Tag.TAG_BYTE)){
-                    byte mode = tag.getByte("Mode");
+                if(tag.contains("Mode")){
+                    byte mode = tag.getByteOr("Mode", (byte) 0);
                     tag.remove("Mode");
                     stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                     stack.set(DC_MODE, mode);
                 }
-                if(tag.contains("Level", Tag.TAG_INT)){
-                    int level = tag.getInt("Level");
+                if(tag.contains("Level")){
+                    int level = tag.getIntOr("Level", 0);
                     tag.remove("level");
                     stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                     stack.set(DC_LEVEL, level);
                 }
-                if(tag.contains("TraceWidth", Tag.TAG_INT)){
-                    int traceWidth = tag.getInt("TraceWidth");
+                if(tag.contains("TraceWidth")){
+                    int traceWidth = tag.getIntOr("TraceWidth", 0);
                     tag.remove("TraceWidth");
                     stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                     stack.set(DC_TRACE_WIDTH, traceWidth);

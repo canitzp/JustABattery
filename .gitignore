@@ -3,8 +3,5 @@
 .idea/
 build/
 classes/
-run/
-run_server/
-run_data/
-run_gametest/
+runs/
 src/generated/

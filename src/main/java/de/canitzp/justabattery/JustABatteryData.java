@@ -15,6 +15,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.tags.KeyTagProvider;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = JustABattery.MODID)
+@EventBusSubscriber(modid = JustABattery.MODID)
 public class JustABatteryData {
 
     @SubscribeEvent
@@ -101,7 +102,7 @@ public class JustABatteryData {
         }
     }
 
-    public static class ItemTagProvider extends TagsProvider<Item> {
+    public static class ItemTagProvider extends KeyTagProvider<Item> {
 
         protected ItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
             super(output, Registries.ITEM, lookupProvider, JustABattery.MODID);
@@ -109,7 +110,7 @@ public class JustABatteryData {
 
         @Override
         protected void addTags(HolderLookup.Provider lookupProvider) {
-            this.tag(ItemTags.create(ResourceLocation.parse("curios:curio"))).add(BuiltInRegistries.ITEM.getResourceKey(JustABattery.BATTERY_ITEM.get()).get());
+            super.tag(ItemTags.create(ResourceLocation.parse("curios:curio"))).add(BuiltInRegistries.ITEM.getResourceKey(JustABattery.BATTERY_ITEM.get()).get());
         }
     }
 
